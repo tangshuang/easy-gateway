@@ -1,0 +1,29 @@
+{
+  "name": "easy-gateway",
+  "version": "0.0.1",
+  "description": "easy gateway",
+  "main": "index.js",
+  "bin": {
+    "ep": "bin.js"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/frustigor/easy-gateway.git"
+  },
+  "keywords": [
+    "gateway"
+  ],
+  "author": "tangshuang",
+  "license": "MIT",
+  "dependencies": {
+    "asw": "^1.1.0",
+    "commander": "^4.1.1",
+    "cookie-parser": "^1.4.4",
+    "express": "^4.17.1",
+    "http-proxy-middleware": "^1.0.0",
+    "pm2": "^4.2.3",
+    "process.args": "0.0.6",
+    "shelljs": "^0.8.3"
+  }
+}
