@@ -7,11 +7,10 @@ class GateWay extends Core {
   }
   async auth(req, res) {
     const rules = this._rules.filter(item => item.auth)
-    const results = await asyncMap(rules, async (rule) => {
+    await asyncMap(rules, async (rule) => {
       const { auth } = rule
-      return await auth(req, res)
+      await auth(req, res)
     })
-    return !results.some(item => !item)
   }
   request(req) {
     const rules = this._rules.filter(item => item.request)

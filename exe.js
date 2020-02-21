@@ -22,31 +22,25 @@ proxier.gateway.setRule({
           httpOnly: true,
           maxAge: 3600*12,
         })
-        return true
-      }
-      else {
-        return false
-      }
-    }
-    else if (cookieToken) {
-      if (cookieToken === token) {
-        return true
       }
       else {
         res.clearCookie('Token')
-        return false
+        throw new Error('query?token does not match token.')
+      }
+    }
+    else if (cookieToken) {
+      if (cookieToken !== token) {
+        res.clearCookie('Token')
+        throw new Error('cookies.token does not match token.')
       }
     }
     else if (headerToken) {
-      if (cookieToken === token) {
-        return true
-      }
-      else {
-        return false
+      if (cookieToken !== token) {
+        throw new Error('headers.token does not match token.')
       }
     }
     else {
-      return false
+      throw new Error('did not recieve token.')
     }
   },
 })

@@ -32,21 +32,13 @@ class Proxier extends Core {
 
     app.use(cookieParser())
     app.use(async function(req, res, next) {
-      const notallowed = (e) => {
-        res.status(401)
-        res.end('Not Allowed!' + (e ? e : ''))
-      }
       try {
-        const auth = await gateway.auth(req, res)
-        if (auth) {
-          next()
-        }
-        else {
-          notallowed()
-        }
+        await gateway.auth(req, res)
+        next()
       }
       catch (e) {
-        notallowed(e)
+        res.status(401)
+        res.end(e instanceof Error ? e.message : 'Not Allowed!')
       }
     })
     app.use(proxy)
