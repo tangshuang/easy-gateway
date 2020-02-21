@@ -21,6 +21,7 @@ commander
   .option('--port [port]', 'which port to serve up for your proxy server')
   .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
+  .option('--debug [debug]')
   .action((options) => {
     const {
       host = '127.0.0.1',
@@ -28,6 +29,7 @@ commander
       target,
       token,
       script,
+      debug,
     } = options
 
     if (!script) {
@@ -45,8 +47,16 @@ commander
     }
 
     const file = script ? path.join(cwd, script) : exe
-    const sh = `npx pm2 start "${file}" --name ${name} --watch -- --host=${host} --port=${port} --target=${target} --token=${token}`
+    let sh = `npx pm2 start "${file}" --name ${name} --watch`
+    if (debug) {
+      sh += ' --no-daemon'
+    }
+    sh += ` -- --host=${host} --port=${port} --target=${target} --token=${token}`
     console.log(sh)
+
+    if (debug) {
+      shell.exec(`npx pm2 stop ${name}`)
+    }
     shell.exec(sh)
   })
 

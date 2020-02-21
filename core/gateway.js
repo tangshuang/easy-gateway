@@ -6,34 +6,37 @@ class GateWay extends Core {
     this._rules = rules || []
   }
   async auth(req, res) {
-    const results = await asyncMap(this._rules, async (rule) => {
+    const rules = this._rules.filter(item => item.auth)
+    const results = await asyncMap(rules, async (rule) => {
       const { auth } = rule
       return await auth(req, res)
     })
-    if (results.some(item => !item)) {
-      throw new Error('Auth Fail!')
-    }
+    return !results.some(item => !item)
   }
   request(req) {
-    this._rules.forEach((rule) => {
+    const rules = this._rules.filter(item => item.request)
+    rules.forEach((rule) => {
       const { request } = rule
       request(req)
     })
   }
   response(res) {
-    this._rules.forEach((rule) => {
+    const rules = this._rules.filter(item => item.response)
+    rules.forEach((rule) => {
       const { response } = rule
       response(res)
     })
   }
   async rewrite(req) {
-    await asyncEach(this._rules, async (rule) => {
+    const rules = this._rules.filter(item => item.rewrite)
+    await asyncEach(rules, async (rule) => {
       const { rewrite } = rule
       await rewrite(req)
     })
   }
   async retarget(req) {
-    await asyncEach(this._rules, async (rule) => {
+    const rules = this._rules.filter(item => item.retarget)
+    await asyncEach(rules, async (rule) => {
       const { retarget } = rule
       await retarget(req)
     })
