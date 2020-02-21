@@ -1,10 +1,10 @@
 {
   "name": "easy-gateway",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "easy gateway",
   "main": "index.js",
   "bin": {
-    "ep": "bin.js"
+    "egw": "bin.js"
   },
   "scripts": {},
   "repository": {
