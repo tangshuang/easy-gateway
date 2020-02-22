@@ -3,6 +3,7 @@ const args = require('process.args')(1)
 const Cookie = require('cookie')
 
 const { host, port, target, token } = args
+const tokenKey = 'Token' + port
 
 const proxier = new Proxier({
   host,
@@ -13,7 +14,6 @@ const proxier = new Proxier({
 if (token) {
   proxier.gateway.setRule({
     async auth(req, res) {
-      const tokenKey = 'Token' + port
       const { cookies, headers, query } = req
       const { [tokenKey]: cookieToken } = cookies
       const { [tokenKey]: headerToken } = headers
