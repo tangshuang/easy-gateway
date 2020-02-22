@@ -13,20 +13,21 @@ const proxier = new Proxier({
 if (token) {
   proxier.gateway.setRule({
     async auth(req, res) {
+      const tokenKey = 'Token' + port
       const { cookies, headers, query } = req
-      const { Token: cookieToken } = cookies
-      const { Token: headerToken } = headers
+      const { [tokenKey]: cookieToken } = cookies
+      const { [tokenKey]: headerToken } = headers
       const { token: queryToken } = query
 
       if (queryToken) {
         if (queryToken !== token) {
-          res.clearCookie('token-' + port)
+          res.clearCookie(tokenKey)
           throw new Error('query?token does not match token.')
         }
       }
       else if (cookieToken) {
         if (cookieToken !== token) {
-          res.clearCookie('token-' + port)
+          res.clearCookie(tokenKey)
           throw new Error('cookies.token does not match token.')
         }
       }
@@ -40,7 +41,7 @@ if (token) {
       }
     },
     response(res) {
-      const tokenCookie = Cookie.serialize('token-' + port, token, {
+      const tokenCookie = Cookie.serialize(tokenKey, token, {
         httpOnly: true,
         maxAge: 3600*12,
       })
