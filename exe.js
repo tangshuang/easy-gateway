@@ -20,13 +20,13 @@ if (token) {
 
       if (queryToken) {
         if (queryToken !== token) {
-          res.clearCookie('Token')
+          res.clearCookie('token-' + port)
           throw new Error('query?token does not match token.')
         }
       }
       else if (cookieToken) {
         if (cookieToken !== token) {
-          res.clearCookie('Token')
+          res.clearCookie('token-' + port)
           throw new Error('cookies.token does not match token.')
         }
       }
@@ -40,7 +40,7 @@ if (token) {
       }
     },
     response(res) {
-      const tokenCookie = Cookie.serialize('Token', token, {
+      const tokenCookie = Cookie.serialize('token-' + port, token, {
         httpOnly: true,
         maxAge: 3600*12,
       })

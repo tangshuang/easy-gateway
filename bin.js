@@ -30,9 +30,9 @@ commander
     const {
       name = dirname,
       host = '127.0.0.1',
+      token = '',
       port,
       target,
-      token,
       script,
       debug,
     } = options
