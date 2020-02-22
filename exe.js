@@ -3,7 +3,9 @@ const args = require('process.args')(1)
 const Cookie = require('cookie')
 
 const { host, port, target, token } = args
-const tokenKey = 'Token' + port
+
+const tokenKey = 'EGW-Token-' + port
+const tokenValue = token
 
 const proxier = new Proxier({
   host,
@@ -11,7 +13,7 @@ const proxier = new Proxier({
   target,
 })
 
-if (token) {
+if (tokenValue) {
   proxier.gateway.setRule({
     async auth(req, res) {
       const { cookies, headers, query } = req
@@ -20,19 +22,19 @@ if (token) {
       const { token: queryToken } = query
 
       if (queryToken) {
-        if (queryToken !== token) {
+        if (queryToken !== tokenValue) {
           res.clearCookie(tokenKey)
           throw new Error('query?token does not match token.')
         }
       }
       else if (cookieToken) {
-        if (cookieToken !== token) {
+        if (cookieToken !== tokenValue) {
           res.clearCookie(tokenKey)
           throw new Error('cookies.token does not match token.')
         }
       }
       else if (headerToken) {
-        if (cookieToken !== token) {
+        if (cookieToken !== tokenValue) {
           throw new Error('headers.token does not match token.')
         }
       }
@@ -41,7 +43,7 @@ if (token) {
       }
     },
     response(res) {
-      const tokenCookie = Cookie.serialize(tokenKey, token, {
+      const tokenCookie = Cookie.serialize(tokenKey, tokenValue, {
         httpOnly: true,
         maxAge: 3600*12,
       })
