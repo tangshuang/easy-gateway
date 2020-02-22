@@ -2,7 +2,7 @@ const Proxier = require('./core/proxier.js')
 const args = require('process.args')(1)
 const Cookie = require('cookie')
 
-const { host, port, target, token, headers = '' } = args
+const { host, port, target, token, headers = '', cookies = '' } = args
 
 const tokenKey = 'EGW-Token-' + port
 const tokenValue = token
@@ -42,13 +42,13 @@ if (tokenValue) {
         throw new Error('did not recieve token.')
       }
     },
-    response(res) {
+    response(proxyRes) {
       const tokenCookie = Cookie.serialize(tokenKey, tokenValue, {
         httpOnly: true,
         maxAge: 3600*12,
       })
-      res.headers['set-cookie'] = res.headers['set-cookie'] || []
-      res.headers['set-cookie'].push(tokenCookie)
+      proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'] || []
+      proxyRes.headers['set-cookie'].push(tokenCookie)
     },
   })
 }
@@ -63,6 +63,16 @@ if (headers) {
           req.setHeader(key, value)
         }
       })
+    },
+  })
+}
+
+if (cookies) {
+  proxier.gateway.setRule({
+    request(proxyReq, req, res) {
+      const originalCookies = req.headers.cookie
+      const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
+      proxyReq.setHeader('Cookie', newCookies)
     },
   })
 }

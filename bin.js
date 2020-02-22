@@ -28,6 +28,7 @@ commander
   .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
+  .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
   .option('--debug [debug]')
   .action((options) => {
     const params = {}
@@ -46,6 +47,7 @@ commander
       host = '0.0.0.0',
       token = '',
       headers = '',
+      cookies = '',
       port,
       target,
       script,
@@ -73,7 +75,7 @@ commander
     if (debug) {
       sh += ' --watch --no-daemon'
     }
-    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}"`
+    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}" --cookies="${cookies}"`
 
     console.log(sh)
 

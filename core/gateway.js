@@ -12,18 +12,18 @@ class GateWay extends Core {
       await auth(req, res)
     })
   }
-  request(req) {
+  request(proxyReq, req, res) {
     const rules = this._rules.filter(item => item.request)
     rules.forEach((rule) => {
       const { request } = rule
-      request(req)
+      request(proxyReq, req, res)
     })
   }
-  response(res) {
+  response(proxyRes, req, res) {
     const rules = this._rules.filter(item => item.response)
     rules.forEach((rule) => {
       const { response } = rule
-      response(res)
+      response(proxyRes, req, res)
     })
   }
   async rewrite(req) {

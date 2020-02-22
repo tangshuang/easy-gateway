@@ -22,10 +22,10 @@ class Proxier extends Core {
         await gateway.retarget(req)
       },
       onProxyReq(proxyReq, req, res) {
-        gateway.request(proxyReq)
+        gateway.request(proxyReq, req, res)
       },
       onProxyRes(proxyRes, req, res) {
-        gateway.response(proxyRes)
+        gateway.response(proxyRes, req, res)
       },
     })
 
