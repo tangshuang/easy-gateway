@@ -87,7 +87,18 @@ commander
   .command('stop')
   .option('--name [name]')
   .action((options) => {
-    const { name = dirname } = options
+    const params = {}
+
+    // load .egwrc file content firstly
+    const configfile = path.join(cwd, '.egwrc')
+    if (fs.existsSync(configfile)) {
+      const config = dotenv.parse(fs.readFileSync(configfile))
+      Object.assign(params, config)
+    }
+    // use options to override
+    Object.assign(params, options)
+
+    const { name = dirname } = params
     shell.exec(`npx pm2 delete ${name}`)
   })
 
