@@ -5,7 +5,7 @@ const commander = require('commander')
 const shell = require('shelljs')
 
 const cwd = process.cwd()
-const name = path.basename(cwd)
+const dirname = path.basename(cwd)
 const exe = path.join(__dirname, 'exe.js')
 
 const pkg = require('./package.json')
@@ -16,6 +16,7 @@ commander
 
 commander
   .command('start')
+  .option('--name [name]')
   .option('--script [script]', 'the js file to run which contains Proxier.')
   .option('--host [host]', 'which host to serve up a proxy server, default is 127.0.0.1')
   .option('--port [port]', 'which port to serve up for your proxy server')
@@ -24,6 +25,7 @@ commander
   .option('--debug [debug]')
   .action((options) => {
     const {
+      name = dirname,
       host = '127.0.0.1',
       port,
       target,
@@ -46,12 +48,14 @@ commander
       assert({ port, target, token })
     }
 
-    const file = script ? path.join(cwd, script) : exe
+    const file = script ? path.resolve(cwd, script) : exe
+
     let sh = `npx pm2 start "${file}" --name ${name} --watch`
     if (debug) {
       sh += ' --no-daemon'
     }
     sh += ` -- --host=${host} --port=${port} --target=${target} --token=${token}`
+
     console.log(sh)
 
     if (debug) {
@@ -62,7 +66,9 @@ commander
 
 commander
   .command('stop')
-  .action(() => {
+  .option('--name [name]')
+  .action((options) => {
+    const { name = dirname } = options
     shell.exec(`npx pm2 delete ${name}`)
   })
 
