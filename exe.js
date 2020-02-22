@@ -1,5 +1,6 @@
 const Proxier = require('./core/proxier.js')
 const args = require('process.args')(1)
+const Cookie = require('cookie')
 
 const { host, port, target, token } = args
 
@@ -17,13 +18,7 @@ proxier.gateway.setRule({
     const { token: queryToken } = query
 
     if (queryToken) {
-      if (queryToken === token) {
-        res.cookie('Token', token, {
-          httpOnly: true,
-          maxAge: 3600*12,
-        })
-      }
-      else {
+      if (queryToken !== token) {
         res.clearCookie('Token')
         throw new Error('query?token does not match token.')
       }
@@ -42,6 +37,14 @@ proxier.gateway.setRule({
     else {
       throw new Error('did not recieve token.')
     }
+  },
+  response(res) {
+    const tokenCookie = Cookie.serialize('Token', token, {
+      httpOnly: true,
+      maxAge: 3600*12,
+    })
+    res.headers['set-cookie'] = res.headers['set-cookie'] || []
+    res.headers['set-cookie'].push(tokenCookie)
   },
 })
 

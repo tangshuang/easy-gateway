@@ -19,6 +19,7 @@
   "dependencies": {
     "asw": "^1.1.0",
     "commander": "^4.1.1",
+    "cookie": "^0.4.0",
     "cookie-parser": "^1.4.4",
     "express": "^4.17.1",
     "http-proxy-middleware": "^1.0.0",
