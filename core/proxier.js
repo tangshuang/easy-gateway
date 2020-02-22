@@ -17,7 +17,7 @@ class Proxier extends Core {
       changeOrigin: true,
       secure: false,
       async pathRewrite(path, req) {
-        await gateway.rewrite(req)
+        return await gateway.rewrite(req) || path
       },
       async router(req) {
         await gateway.retarget(req)

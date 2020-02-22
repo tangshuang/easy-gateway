@@ -1,5 +1,5 @@
 const Core = require('./core.js')
-const { asyncEach, asyncMap } = require('asw')
+const { asyncEach, asyncMap, asyncIterate } = require('asw')
 
 class GateWay extends Core {
   init(rules) {
@@ -28,17 +28,31 @@ class GateWay extends Core {
   }
   async rewrite(req) {
     const rules = this._rules.filter(item => item.rewrite)
-    await asyncEach(rules, async (rule) => {
+    const path = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
       const { rewrite } = rule
-      await rewrite(req)
+      const result = await rewrite(req)
+      if (result) {
+        complete(result)
+      }
+      else {
+        next()
+      }
     })
+    return path
   }
   async retarget(req) {
     const rules = this._rules.filter(item => item.retarget)
-    await asyncEach(rules, async (rule) => {
+    const target = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
       const { retarget } = rule
-      await retarget(req)
+      const result = await retarget(req)
+      if (result) {
+        complete(result)
+      }
+      else {
+        next()
+      }
     })
+    return target
   }
 
   setRule(rule) {

@@ -3,6 +3,8 @@
 const path = require('path')
 const commander = require('commander')
 const shell = require('shelljs')
+const fs = require('fs')
+const dotenv = require('dotenv')
 
 const cwd = process.cwd()
 const dirname = path.basename(cwd)
@@ -25,17 +27,31 @@ commander
   .option('--port [port]', 'which port to serve up for your proxy server')
   .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
+  .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
   .option('--debug [debug]')
   .action((options) => {
+    const params = {}
+
+    // load .egwrc file content firstly
+    const configfile = path.join(cwd, '.egwrc')
+    if (fs.existsSync(configfile)) {
+      const config = dotenv.parse(fs.readFileSync(configfile))
+      Object.assign(params, config)
+    }
+    // use options to override
+    Object.assign(params, options)
+
     const {
       name = dirname,
       host = '127.0.0.1',
       token = '',
+      headers = '',
       port,
       target,
       script,
       debug,
-    } = options
+    } = params
+
 
     if (!script) {
       const assert = (obj) => {
@@ -53,11 +69,11 @@ commander
 
     const file = script ? path.resolve(cwd, script) : exe
 
-    let sh = `npx pm2 start "${file}" --name ${name} --watch`
+    let sh = `npx pm2 start "${file}" --name="${name}"`
     if (debug) {
-      sh += ' --no-daemon'
+      sh += ' --watch --no-daemon'
     }
-    sh += ` -- --host=${host} --port=${port} --target=${target} --token=${token}`
+    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}"`
 
     console.log(sh)
 

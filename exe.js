@@ -2,7 +2,7 @@ const Proxier = require('./core/proxier.js')
 const args = require('process.args')(1)
 const Cookie = require('cookie')
 
-const { host, port, target, token } = args
+const { host, port, target, token, headers = '' } = args
 
 const tokenKey = 'EGW-Token-' + port
 const tokenValue = token
@@ -49,6 +49,20 @@ if (tokenValue) {
       })
       res.headers['set-cookie'] = res.headers['set-cookie'] || []
       res.headers['set-cookie'].push(tokenCookie)
+    },
+  })
+}
+
+if (headers) {
+  const items = headers.split(',')
+  proxier.gateway.setRule({
+    request(req) {
+      items.forEach((item) => {
+        const [key, value] = item.split(':')
+        if (key && value) {
+          req.setHeader(key, value)
+        }
+      })
     },
   })
 }
