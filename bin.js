@@ -13,6 +13,9 @@ const pkg = require('./package.json')
 commander
   .name(pkg.name)
   .version(pkg.version)
+  // https://github.com/tj/commander.js/pull/1102
+  .storeOptionsAsProperties(false)
+  .passCommandToAction(false)
 
 commander
   .command('start')
