@@ -48,7 +48,7 @@ commander
           }
         })
       }
-      assert({ port, target, token })
+      assert({ port, target })
     }
 
     const file = script ? path.resolve(cwd, script) : exe
