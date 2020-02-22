@@ -7,15 +7,14 @@ const GateWay = require('./gateway.js')
 
 class Proxier extends Core {
   init(options) {
-    const { target, headers, timeout, gateway = new GateWay() } = options
+    const { target, headers, gateway = new GateWay(), ...others } = options
 
     const app = express()
     const proxy = createProxyMiddleware({
       target,
       headers,
-      timeout,
       changeOrigin: true,
-      secure: false,
+      ...others,
       async pathRewrite(path, req) {
         return await gateway.rewrite(req) || path
       },
