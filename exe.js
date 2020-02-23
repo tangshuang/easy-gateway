@@ -9,7 +9,7 @@ const tokenValue = token
 
 const proxier = new Proxier({
   host,
-  port: +port,
+  port,
   target,
 })
 
@@ -53,26 +53,28 @@ if (tokenValue) {
   })
 }
 
-if (headers) {
-  const items = headers.split(',')
-  proxier.gateway.setRule({
-    request(req) {
-      items.forEach((item) => {
-        const [key, value] = item.split(':')
-        if (key && value) {
-          req.setHeader(key, value)
-        }
-      })
-    },
-  })
-}
-
 if (cookies) {
   proxier.gateway.setRule({
     request(proxyReq, req, res) {
       const originalCookies = req.headers.cookie
       const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
       proxyReq.setHeader('Cookie', newCookies)
+    },
+  })
+}
+
+// headers comes later after cookies, so that, dev can override Cookie by using `headers="Cookie: a=1; b=2"`
+if (headers) {
+  const items = headers.split(';;').filter(item => !!item)
+  proxier.gateway.setRule({
+    request(req) {
+      items.forEach((item) => {
+        const [key, ...values] = item.split(':')
+        const value = values.join(':') // the value may contain :, i.e. "Some: this is the value: 1;;"
+        if (key && value) {
+          req.setHeader(key.trim(), value.trim())
+        }
+      })
     },
   })
 }
