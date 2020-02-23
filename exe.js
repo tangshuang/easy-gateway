@@ -1,20 +1,27 @@
 const Proxier = require('./core/proxier.js')
+const GateWay = require('./core/gateway.js')
+
 const args = require('process.args')(1)
 const Cookie = require('cookie')
+const fs = require('fs')
 
-const { host, port, target, token, headers = '', cookies = '' } = args
+const {
+  script,
+  host,
+  port,
+  target,
+  token,
+  headers = '',
+  cookies = '',
+} = args
 
 const tokenKey = 'EGW-Token-' + port
 const tokenValue = token
 
-const proxier = new Proxier({
-  host,
-  port,
-  target,
-})
+let gateway = new GateWay()
 
 if (tokenValue) {
-  proxier.gateway.setRule({
+  gateway.use({
     async auth(req, res) {
       const { cookies, headers, query } = req
       const { [tokenKey]: cookieToken } = cookies
@@ -54,7 +61,7 @@ if (tokenValue) {
 }
 
 if (cookies) {
-  proxier.gateway.setRule({
+  gateway.use({
     request(proxyReq, req, res) {
       const originalCookies = req.headers.cookie
       const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
@@ -66,7 +73,7 @@ if (cookies) {
 // headers comes later after cookies, so that, dev can override Cookie by using `headers="Cookie: a=1; b=2"`
 if (headers) {
   const items = headers.split(';;').filter(item => !!item)
-  proxier.gateway.setRule({
+  gateway.use({
     request(req) {
       items.forEach((item) => {
         const [key, ...values] = item.split(':')
@@ -79,4 +86,19 @@ if (headers) {
   })
 }
 
+if (script && fs.existsSync(script)) {
+  const callback = require(script)
+  const output = callback.call(gateway, args)
+  // replace original gateway instance
+  if (output instanceof GateWay) {
+    gateway = output
+  }
+}
+
+const proxier = new Proxier({
+  host,
+  port,
+  target,
+  gateway,
+})
 proxier.start()

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const path = require('path')
-const commander = require('commander')
+const { Command } = require('commander')
 const shell = require('shelljs')
 const fs = require('fs')
 const dotenv = require('dotenv')
@@ -12,23 +12,27 @@ const exe = path.join(__dirname, 'exe.js')
 
 const pkg = require('./package.json')
 
-commander
+const program = new Command()
+
+program
+  // https://github.com/tj/commander.js/pull/1102
+   .storeOptionsAsProperties(false)
+   .passCommandToAction(false)
+
+program
   .name(pkg.name)
   .version(pkg.version)
-  // https://github.com/tj/commander.js/pull/1102
-  .storeOptionsAsProperties(false)
-  .passCommandToAction(false)
 
-commander
+program
   .command('start')
   .option('--name [name]')
-  .option('--script [script]', 'the js file to run which contains Proxier.')
+  .option('--script [script]', 'the js file to run which modify GateWay.')
   .option('--host [host]', 'which host to serve up a proxy server, default is 127.0.0.1')
   .option('--port [port]', 'which port to serve up for your proxy server')
   .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
-  .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
+  .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
   .option('--debug [debug]')
   .action((options) => {
     const params = {}
@@ -54,28 +58,25 @@ commander
       debug,
     } = params
 
-
-    if (!script) {
-      const assert = (obj) => {
-        const keys = Object.keys(obj)
-        keys.forEach((key) => {
-          const value = obj[key]
-          if (value === undefined) {
-            console.error(`--${key} should must be passed!`)
-            process.exit(1)
-          }
-        })
-      }
-      assert({ port, target })
+    const assert = (obj) => {
+      const keys = Object.keys(obj)
+      keys.forEach((key) => {
+        const value = obj[key]
+        if (value === undefined) {
+          console.error(`--${key} should must be passed!`)
+          process.exit(1)
+        }
+      })
     }
+    assert({ port, target })
 
-    const file = script ? path.resolve(cwd, script) : exe
-
-    let sh = `npx pm2 start "${file}" --name="${name}"`
+    let sh = `npx pm2 start "${exe}" --name="${name}"`
     if (debug) {
       sh += ' --watch --no-daemon'
     }
-    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}" --cookies="${cookies}"`
+
+    const file = script ? path.resolve(cwd, script) : ''
+    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}" --cookies="${cookies}" --script="${file}"`
 
     console.log(sh)
 
@@ -85,7 +86,7 @@ commander
     shell.exec(sh)
   })
 
-commander
+program
   .command('stop')
   .option('--name [name]')
   .action((options) => {
@@ -104,4 +105,5 @@ commander
     shell.exec(`npx pm2 delete ${name}`)
   })
 
-commander.parse(process.argv)
+program
+  .parse(process.argv)

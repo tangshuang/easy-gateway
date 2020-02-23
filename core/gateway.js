@@ -1,5 +1,5 @@
 const Core = require('./core.js')
-const { asyncEach, asyncMap, asyncIterate } = require('asw')
+const { asyncMap, asyncIterate } = require('asw')
 
 class GateWay extends Core {
   init(rules) {
@@ -55,8 +55,18 @@ class GateWay extends Core {
     return target
   }
 
-  setRule(rule) {
+  use(rule) {
     this._rules.push(rule)
+    return this
+  }
+
+  clear() {
+    this._rules = []
+    return this
+  }
+
+  each(fn) {
+    this._rules.forEach(fn)
     return this
   }
 }
