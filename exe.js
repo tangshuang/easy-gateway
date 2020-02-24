@@ -15,42 +15,45 @@ const {
   cookies = '',
 } = args
 
-const tokenKey = 'EGW-Token-' + port
-const tokenValue = token
+const TOKEN_KEY = 'token'
+const HEADER_TOKEN_KEY = 'EGW-' + TOKEN_KEY.toUpperCase()
+// cookie token name should must appendding with -[port], because different port use same cookie
+const COOKIE_TOKEN_KEY = HEADER_TOKEN_KEY + '-' + port
 
 let gateway = new GateWay()
 
-if (tokenValue) {
+if (token) {
   gateway.use({
     async auth(req, res) {
-      const { cookies, headers, query } = req
-      const { [tokenKey]: cookieToken } = cookies
-      const { [tokenKey]: headerToken } = headers
-      const { token: queryToken } = query
+      const { cookies, query } = req
+      const queryToken = query[TOKEN_KEY]
+      const cookieToken = cookies[COOKIE_TOKEN_KEY]
+      // we must use req.get to get header to ignore case-insensitive problem
+      const headerToken = req.get(HEADER_TOKEN_KEY)
 
       if (queryToken) {
-        if (queryToken !== tokenValue) {
-          res.clearCookie(tokenKey)
+        if (queryToken !== token) {
+          res.clearCookie(COOKIE_TOKEN_KEY)
           throw new Error('query?token does not match token.')
         }
       }
       else if (cookieToken) {
-        if (cookieToken !== tokenValue) {
-          res.clearCookie(tokenKey)
-          throw new Error('cookies.token does not match token.')
+        if (cookieToken !== token) {
+          res.clearCookie(COOKIE_TOKEN_KEY)
+          throw new Error(`cookies[${COOKIE_TOKEN_KEY}] does not match token.`)
         }
       }
       else if (headerToken) {
-        if (cookieToken !== tokenValue) {
-          throw new Error('headers.token does not match token.')
+        if (headerToken !== token) {
+          throw new Error(`HEADER[${HEADER_TOKEN_KEY}] does not match token.`)
         }
       }
       else {
-        throw new Error('did not recieve token.')
+        throw new Error('Did not recieve token.')
       }
     },
     response(proxyRes) {
-      const tokenCookie = Cookie.serialize(tokenKey, tokenValue, {
+      const tokenCookie = Cookie.serialize(COOKIE_TOKEN_KEY, token, {
         httpOnly: true,
         maxAge: 3600*12,
       })
@@ -62,7 +65,7 @@ if (tokenValue) {
 
 if (cookies) {
   gateway.use({
-    request(proxyReq, req, res) {
+    request(proxyReq, req) {
       const originalCookies = req.headers.cookie
       const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
       proxyReq.setHeader('Cookie', newCookies)
@@ -74,12 +77,12 @@ if (cookies) {
 if (headers) {
   const items = headers.split(';;').filter(item => !!item)
   gateway.use({
-    request(req) {
+    request(proxyReq) {
       items.forEach((item) => {
         const [key, ...values] = item.split(':')
         const value = values.join(':') // the value may contain :, i.e. "Some: this is the value: 1;;"
         if (key && value) {
-          req.setHeader(key.trim(), value.trim())
+          proxyReq.setHeader(key.trim(), value.trim())
         }
       })
     },
