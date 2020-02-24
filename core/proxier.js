@@ -19,7 +19,7 @@ class Proxier extends Core {
         return await gateway.rewrite(req) || path
       },
       async router(req) {
-        await gateway.retarget(req)
+        return await gateway.retarget(req)
       },
       onProxyReq(proxyReq, req, res) {
         gateway.request(proxyReq, req, res)
@@ -36,6 +36,7 @@ class Proxier extends Core {
         next()
       }
       catch (e) {
+        console.error(e)
         res.status(401)
         res.end(e instanceof Error ? e.message : 'Not Allowed!')
       }

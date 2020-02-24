@@ -72,11 +72,30 @@ program
 
     let sh = `npx pm2 start "${exe}" --name="${name}"`
     if (debug) {
-      sh += ' --watch --no-daemon'
+      sh += ' --no-daemon'
+    }
+
+    sh += ' --'
+    sh += ` --host="${host}" --port="${port}" --target="${target}"`
+
+    if (token) {
+      sh += ` --token="${token}"`
+    }
+    if (headers) {
+      sh += ` --headers="${headers}"`
+    }
+    if (cookies) {
+      sh += ` --cookies="${cookies}"`
     }
 
     const file = script ? path.resolve(cwd, script) : ''
-    sh += ` -- --host="${host}" --port="${port}" --target="${target}" --token="${token}" --headers="${headers}" --cookies="${cookies}" --script="${file}"`
+    if (file) {
+      sh += ` --script="${file}"`
+    }
+
+    if (debug) {
+      sh += ` --debug`
+    }
 
     console.log(sh)
 

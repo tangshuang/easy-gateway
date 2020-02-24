@@ -13,6 +13,7 @@ const {
   token,
   headers = '',
   cookies = '',
+  debug,
 } = args
 
 const TOKEN_KEY = 'token'
@@ -103,5 +104,6 @@ const proxier = new Proxier({
   port,
   target,
   gateway,
+  logLevel: debug && 'debug',
 })
 proxier.start()
