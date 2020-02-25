@@ -16,10 +16,10 @@ class Proxier extends Core {
       changeOrigin: true,
       ...others,
       async pathRewrite(path, req) {
-        return await gateway.rewrite(req) || path
+        return await gateway.rewrite(req, path)
       },
       async router(req) {
-        return await gateway.retarget(req)
+        return await gateway.retarget(req, target)
       },
       onProxyReq(proxyReq, req, res) {
         gateway.request(proxyReq, req, res)

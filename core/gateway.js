@@ -26,11 +26,11 @@ class GateWay extends Core {
       response(proxyRes, req, res)
     })
   }
-  async rewrite(req) {
+  async rewrite(req, path) {
     const rules = this._rules.filter(item => item.rewrite)
-    const path = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
+    const newPath = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
       const { rewrite } = rule
-      const result = await rewrite(req)
+      const result = await rewrite(req, path)
       if (result) {
         complete(result)
       }
@@ -38,13 +38,13 @@ class GateWay extends Core {
         next()
       }
     })
-    return path
+    return newPath
   }
-  async retarget(req) {
+  async retarget(req, target) {
     const rules = this._rules.filter(item => item.retarget)
-    const target = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
+    const newTarget = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
       const { retarget } = rule
-      const result = await retarget(req)
+      const result = await retarget(req, target)
       if (result) {
         complete(result)
       }
@@ -52,7 +52,7 @@ class GateWay extends Core {
         next()
       }
     })
-    return target
+    return newTarget
   }
 
   use(rule) {
