@@ -16,36 +16,40 @@ const {
   debug,
 } = args
 
+
 const TOKEN_KEY = 'token'
 const HEADER_TOKEN_KEY = 'EGW-' + TOKEN_KEY.toUpperCase()
 // cookie token name should must appendding with -[port], because different port use same cookie
 const COOKIE_TOKEN_KEY = HEADER_TOKEN_KEY + '-' + port
 
+// allow set --token=tokenKey:tokenValue
+const [tokenKey = TOKEN_KEY, tokenValue] = token.indexOf(':') > 0 ? token.split(':') : ['', token]
+
 let gateway = new GateWay()
 
-if (token) {
+if (tokenValue) {
   gateway.use({
     async auth(req, res) {
       const { cookies, query } = req
-      const queryToken = query[TOKEN_KEY]
+      const queryToken = query[tokenKey]
       const cookieToken = cookies[COOKIE_TOKEN_KEY]
       // we must use req.get to get header to ignore case-insensitive problem
       const headerToken = req.get(HEADER_TOKEN_KEY)
 
       if (queryToken) {
-        if (queryToken !== token) {
+        if (queryToken !== tokenValue) {
           res.clearCookie(COOKIE_TOKEN_KEY)
           throw new Error('query?token does not match token.')
         }
       }
       else if (cookieToken) {
-        if (cookieToken !== token) {
+        if (cookieToken !== tokenValue) {
           res.clearCookie(COOKIE_TOKEN_KEY)
           throw new Error(`cookies[${COOKIE_TOKEN_KEY}] does not match token.`)
         }
       }
       else if (headerToken) {
-        if (headerToken !== token) {
+        if (headerToken !== tokenValue) {
           throw new Error(`HEADER[${HEADER_TOKEN_KEY}] does not match token.`)
         }
       }
