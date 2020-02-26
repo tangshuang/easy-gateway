@@ -1,6 +1,6 @@
 {
   "name": "easy-gateway",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "easy gateway",
   "main": "index.js",
   "bin": {
