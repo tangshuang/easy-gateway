@@ -23,7 +23,7 @@ const HEADER_TOKEN_KEY = 'EGW-' + TOKEN_KEY.toUpperCase()
 const COOKIE_TOKEN_KEY = HEADER_TOKEN_KEY + '-' + port
 
 // allow set --token=tokenKey:tokenValue
-const [tokenKey = TOKEN_KEY, tokenValue] = token.indexOf(':') > 0 ? token.split(':') : ['', token]
+const [tokenKey = TOKEN_KEY, tokenValue] = (token.indexOf(':') > 0 ? token.split(':') : ['', token])
 
 let gateway = new GateWay()
 
@@ -58,7 +58,7 @@ if (tokenValue) {
       }
     },
     response(proxyRes) {
-      const tokenCookie = Cookie.serialize(COOKIE_TOKEN_KEY, token, {
+      const tokenCookie = Cookie.serialize(COOKIE_TOKEN_KEY, tokenValue, {
         httpOnly: true,
         maxAge: 3600*12,
       })
