@@ -5,7 +5,7 @@ const { Command } = require('commander')
 const shell = require('shelljs')
 const fs = require('fs')
 const dotenv = require('dotenv')
-const { createRandomString } = require('./core/utils.js')
+const { createRandomStr, createRandomNum } = require('./core/utils.js')
 
 const cwd = process.cwd()
 const dirname = path.basename(cwd)
@@ -53,7 +53,7 @@ program
       token = '',
       headers = '',
       cookies = '',
-      port,
+      port = createRandomNum(10000, 20000), // default random port
       target,
       script,
       debug,
@@ -69,7 +69,7 @@ program
         }
       })
     }
-    assert({ port, target })
+    assert({ target })
 
     let sh = `npx pm2 start "${exe}" --name="${name}"`
     if (debug) {
@@ -82,8 +82,8 @@ program
     if (token) {
       if (token === true) {
         // create a random token
-        const random = createRandomString()
-        sh += ` --token="${random}"`
+        const randomStr = createRandomStr()
+        sh += ` --token="${randomStr}"`
       }
       else {
         sh += ` --token="${token}"`

@@ -1,6 +1,6 @@
 const CHARS = '0123456789abcdefghigklmnopqrstuvwxyzABCDEFGHIGKLMNOPQRSTUVWXYZ'
 
-function createRandomString(length = 16) {
+function createRandomStr(length = 16) {
   let text = ''
   for (let i = 0; i < length; i++) {
     text += CHARS.charAt(Math.floor(Math.random() * CHARS.length))
@@ -8,6 +8,14 @@ function createRandomString(length = 16) {
   return text
 }
 
+function createRandomNum(min, max) {
+  const diff = max - min
+  const random = parseInt(Math.random() * diff, 10)
+  const value = min + random
+  return value
+}
+
 module.exports = {
-  createRandomString,
+  createRandomStr,
+  createRandomNum,
 }
