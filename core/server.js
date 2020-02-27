@@ -25,8 +25,7 @@ class Server extends Core {
     })
     app.use(async function(req, res, next) {
       try {
-        await gateway.serve(req, res)
-        next()
+        await gateway.serve(req, res, next)
       }
       catch (e) {
         console.error(e)

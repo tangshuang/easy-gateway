@@ -54,13 +54,23 @@ class GateWay extends Core {
     })
     return newTarget
   }
-  async serve(req, res) {
+  async serve(req, res, next) {
     const rules = this._rules.filter(item => item.serve)
 
-    await asyncEach(rules, async (rule, i, next, stop, complete) => {
+    const end = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
       const { serve } = rule
-      await serve(req, res, next, stop, complete)
+      const result = await serve(req, res)
+      if (result) {
+        complete(1)
+      }
+      else {
+        next()
+      }
     })
+
+    if (!end) {
+      next()
+    }
   }
 
   use(rule) {
