@@ -16,14 +16,12 @@ const {
   debug,
 } = args
 
+// allow set --token=tokenKey:tokenValue
+const [tokenKey, tokenValue] = (token.indexOf(':') > 0 ? token.split(':') : ['token', token])
 
-const TOKEN_KEY = 'token'
-const HEADER_TOKEN_KEY = 'EGW-' + TOKEN_KEY.toUpperCase()
+const HEADER_TOKEN_KEY = 'EGW-TOKEN'
 // cookie token name should must appendding with -[port], because different port use same cookie
 const COOKIE_TOKEN_KEY = HEADER_TOKEN_KEY + '-' + port
-
-// allow set --token=tokenKey:tokenValue
-const [tokenKey = TOKEN_KEY, tokenValue] = (token.indexOf(':') > 0 ? token.split(':') : ['', token])
 
 let gateway = new GateWay()
 
