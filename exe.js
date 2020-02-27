@@ -1,5 +1,6 @@
 const Proxier = require('./core/proxier.js')
 const GateWay = require('./core/gateway.js')
+const Server = require('./core/server.js')
 
 const args = require('process.args')(1)
 const Cookie = require('cookie')
@@ -10,10 +11,10 @@ const {
   host,
   port,
   target,
-  token,
+  token = '',
   headers = '',
   cookies = '',
-  debug,
+  debug = false,
 } = args
 
 // allow set --token=tokenKey:tokenValue
@@ -101,11 +102,22 @@ if (script && fs.existsSync(script)) {
   }
 }
 
-const proxier = new Proxier({
-  host,
-  port,
-  target,
-  gateway,
-  logLevel: debug && 'debug',
-})
-proxier.start()
+if (target.indexOf('.') === 0 || target.indexOf('/') === 0) {
+  const server = new Server({
+    host,
+    port,
+    target,
+    gateway,
+  })
+  server.start()
+}
+else {
+  const proxier = new Proxier({
+    host,
+    port,
+    target,
+    gateway,
+    logLevel: debug && 'info',
+  })
+  proxier.start()
+}

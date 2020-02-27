@@ -1,5 +1,5 @@
 const Core = require('./core.js')
-const { asyncMap, asyncIterate } = require('asw')
+const { asyncEach, asyncMap, asyncIterate } = require('asw')
 
 class GateWay extends Core {
   init(rules) {
@@ -53,6 +53,14 @@ class GateWay extends Core {
       }
     })
     return newTarget
+  }
+  async serve(req, res) {
+    const rules = this._rules.filter(item => item.serve)
+
+    await asyncEach(rules, async (rule, i, next, stop, complete) => {
+      const { serve } = rule
+      await serve(req, res, next, stop, complete)
+    })
   }
 
   use(rule) {
