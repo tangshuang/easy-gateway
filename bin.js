@@ -5,6 +5,7 @@ const { Command } = require('commander')
 const shell = require('shelljs')
 const fs = require('fs')
 const dotenv = require('dotenv')
+const { createRandomString } = require('./core/utils.js')
 
 const cwd = process.cwd()
 const dirname = path.basename(cwd)
@@ -79,7 +80,14 @@ program
     sh += ` --host="${host}" --port="${port}" --target="${target}"`
 
     if (token) {
-      sh += ` --token="${token}"`
+      if (token === true) {
+        // create a random token
+        const random = createRandomString()
+        sh += ` --token="${random}"`
+      }
+      else {
+        sh += ` --token="${token}"`
+      }
     }
     if (headers) {
       sh += ` --headers="${headers}"`
