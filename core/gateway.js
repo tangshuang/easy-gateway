@@ -54,7 +54,7 @@ class GateWay extends Core {
     })
     return newTarget
   }
-  async serve(req, res, next) {
+  async serve(req, res) {
     const rules = this._rules.filter(item => item.serve)
 
     const end = await asyncIterate(rules, async (rule, i, next, stop, complete) => {
@@ -68,9 +68,7 @@ class GateWay extends Core {
       }
     })
 
-    if (!end) {
-      next()
-    }
+    return end
   }
 
   use(rule) {

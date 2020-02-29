@@ -7,27 +7,9 @@ const GateWay = require('./gateway.js')
 
 class Proxier extends Core {
   init(options) {
-    const { target, headers, gateway = new GateWay(), ...others } = options
+    const { target, base, gateway = new GateWay(), ...others } = options
 
     const app = express()
-    const proxy = createProxyMiddleware({
-      target,
-      headers,
-      changeOrigin: true,
-      ...others,
-      async pathRewrite(path, req) {
-        return await gateway.rewrite(req, path)
-      },
-      async router(req) {
-        return await gateway.retarget(req, target)
-      },
-      onProxyReq(proxyReq, req, res) {
-        gateway.request(proxyReq, req, res)
-      },
-      onProxyRes(proxyRes, req, res) {
-        gateway.response(proxyRes, req, res)
-      },
-    })
 
     app.use(cookieParser())
     app.use(async function(req, res, next) {
@@ -41,7 +23,49 @@ class Proxier extends Core {
         res.end(e instanceof Error ? e.message : 'Not Allowed!')
       }
     })
-    app.use(proxy)
+
+    // base is string or array
+    if (base && base.length > 0) {
+      const files = Array.isArray(base) ? base : [base]
+      files.forEach((file) => {
+        app.use(express.static(file))
+      })
+    }
+
+    app.use(async function(req, res, next) {
+      try {
+        const end = await gateway.serve(req, res)
+        if (!end) {
+          next()
+        }
+      }
+      catch (e) {
+        console.error(e)
+        res.status(500)
+        res.end(e instanceof Error ? e.message : 'Server Error!')
+      }
+    })
+
+    if (target) {
+      const proxy = createProxyMiddleware({
+        target,
+        changeOrigin: true,
+        ...others,
+        async pathRewrite(path, req) {
+          return await gateway.rewrite(req, path)
+        },
+        async router(req) {
+          return await gateway.retarget(req, target)
+        },
+        onProxyReq(proxyReq, req, res) {
+          gateway.request(proxyReq, req, res)
+        },
+        onProxyRes(proxyRes, req, res) {
+          gateway.response(proxyRes, req, res)
+        },
+      })
+      app.use(proxy)
+    }
 
     this.options = options
     this.gateway = gateway

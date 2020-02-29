@@ -1,16 +1,19 @@
 const Proxier = require('./core/proxier.js')
 const GateWay = require('./core/gateway.js')
-const Server = require('./core/server.js')
 
 const args = require('process.args')(1)
 const Cookie = require('cookie')
 const fs = require('fs')
+const path = require('path')
+
+const cwd = process.cwd()
 
 const {
   script,
   host,
   port,
   target,
+  base = '',
   token = '',
   headers = '',
   cookies = '',
@@ -102,22 +105,13 @@ if (script && fs.existsSync(script)) {
   }
 }
 
-if (target.indexOf('.') === 0 || target.indexOf('/') === 0) {
-  const server = new Server({
-    host,
-    port,
-    target,
-    gateway,
-  })
-  server.start()
-}
-else {
-  const proxier = new Proxier({
-    host,
-    port,
-    target,
-    gateway,
-    logLevel: debug && 'info',
-  })
-  proxier.start()
-}
+const files = base.split(';;').filter(item => !!item).map(item => path.resolve(cwd, item))
+const proxier = new Proxier({
+  host,
+  port,
+  target,
+  base: files,
+  gateway,
+  logLevel: debug && 'info',
+})
+proxier.start()

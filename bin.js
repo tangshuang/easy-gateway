@@ -31,6 +31,7 @@ program
   .option('--host [host]', 'which host to serve up a proxy server, default is 127.0.0.1')
   .option('--port [port]', 'which port to serve up for your proxy server')
   .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
+  .option('--base [base]', 'the static files to serve up')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
   .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
@@ -55,21 +56,15 @@ program
       cookies = '',
       port = createRandomNum(10000, 20000), // default random port
       target,
+      base,
       script,
       debug,
     } = params
 
-    const assert = (obj) => {
-      const keys = Object.keys(obj)
-      keys.forEach((key) => {
-        const value = obj[key]
-        if (value === undefined) {
-          console.error(`--${key} should must be passed!`)
-          process.exit(1)
-        }
-      })
+    if (!target && !base) {
+      console.error('--target and --base are not passed!')
+      process.exit(1)
     }
-    assert({ target })
 
     let sh = `npx pm2 start "${exe}" --name="${name}"`
     if (debug) {
@@ -77,7 +72,15 @@ program
     }
 
     sh += ' --'
-    sh += ` --host="${host}" --port="${port}" --target="${target}"`
+    sh += ` --host="${host}" --port="${port}"`
+
+    if (target) {
+      sh += ` --target="${target}"`
+    }
+
+    if (base) {
+      sh += ` --base="${base}"`
+    }
 
     if (token) {
       if (token === true) {
@@ -89,6 +92,7 @@ program
         sh += ` --token="${token}"`
       }
     }
+
     if (headers) {
       sh += ` --headers="${headers}"`
     }
@@ -96,8 +100,8 @@ program
       sh += ` --cookies="${cookies}"`
     }
 
-    const file = script ? path.resolve(cwd, script) : ''
-    if (file) {
+    if (script) {
+      const file = path.resolve(cwd, script)
       sh += ` --script="${file}"`
     }
 
