@@ -11,7 +11,7 @@ npm i -g easy-gateway
 ## CLI
 
 ```
-egw start --port=[port] --target=[target]
+egw start --target=[target]
 ```
 
 Params:
@@ -20,10 +20,12 @@ Params:
 - host: which ip to bind, 127.0.0.1 or 0.0.0.0 or others
 - port: which port to serve
 - target: which target to proxy to, give the target url
+- base: which dirs/files to serve up as static
 - token: if set, you should given token to access this server by queryString ?token=xxx
 - cookies: if set, the request to target will keep this cookie (original cookie as well)
 - headers: if set, http HEADER will be overrided
 - debug: if set, you can see the log in console
+- script: a js file to operate gateway
 
 If you want to maintain this params, you can create a `.egwrc` file in your dir, and put this params in it, like:
 
@@ -45,10 +47,6 @@ Params:
 - name: the server to stop, use current dirname as default
 
 ## API
-
-```
-egw start --host=[host] --port=[port] --target=[target] --script=[script]
-```
 
 The `script` param allow you to define your own gateway:
 
@@ -91,6 +89,7 @@ const rule = {
   response(res) {},
   async rewrite(req) {},
   async retarget(req) {},
+  async serve(req, res) {},
 }
 ```
 

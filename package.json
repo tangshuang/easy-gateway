@@ -9,10 +9,11 @@
   "scripts": {},
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/frustigor/easy-gateway.git"
+    "url": "https://github.com/tangshuang/easy-gateway.git"
   },
   "keywords": [
-    "gateway"
+    "gateway",
+    "proxy"
   ],
   "author": "tangshuang",
   "license": "MIT",
