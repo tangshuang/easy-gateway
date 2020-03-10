@@ -11,6 +11,14 @@ const cwd = process.cwd()
 const dirname = path.basename(cwd)
 const exe = path.join(__dirname, 'exe.js')
 
+const pm2_cwd = path.join(cwd, 'node_modules/.bin/pm2')
+const pm2_local = path.join(__dirname, 'node_modules/.bin/pm2')
+const pm2_global = path.join(__dirname, '../node_modules/.bin/pm2')
+const pm2 = fs.existsSync(pm2_cwd) ? `"${pm2_cwd}"`
+  : fs.existsSync(pm2_local) ? `"${pm2_local}"`
+  : fs.existsSync(pm2_global) ? `"${pm2_global}"`
+  : 'npx pm2'
+
 const pkg = require('./package.json')
 
 const program = new Command()
@@ -56,17 +64,19 @@ program
       cookies = '',
       port = createRandomNum(10000, 20000), // default random port
       target,
-      base,
       script,
       debug,
     } = params
 
+    let {
+      base,
+    } = params
+
     if (!target && !base) {
-      console.error('--target and --base are not passed!')
-      process.exit(1)
+      base = '.'
     }
 
-    let sh = `npx pm2 start "${exe}" --name="${name}"`
+    let sh = `${pm2} start "${exe}" --name="${name}"`
     if (debug) {
       sh += ' --no-daemon'
     }
@@ -96,6 +106,7 @@ program
     if (headers) {
       sh += ` --headers="${headers}"`
     }
+
     if (cookies) {
       sh += ` --cookies="${cookies}"`
     }
@@ -112,7 +123,7 @@ program
     console.log(sh)
 
     if (debug) {
-      shell.exec(`npx pm2 stop ${name}`)
+      shell.exec(`${pm2} stop ${name}`)
     }
     shell.exec(sh)
   })
@@ -133,7 +144,139 @@ program
     Object.assign(params, options)
 
     const { name = dirname } = params
-    shell.exec(`npx pm2 delete ${name}`)
+    shell.exec(`${pm2} delete ${name}`)
+  })
+
+program
+  .command('on')
+  .action(() => {
+    const run = (configfile) => {
+      const config = dotenv.parse(fs.readFileSync(configfile))
+      const {
+        name,
+        host = '0.0.0.0',
+        token = '',
+        headers = '',
+        cookies = '',
+        port,
+        target,
+        base,
+        script,
+      } = config
+
+      if (!name) {
+        console.error(`[name] is undefined, [${configfile}] will not be used.`)
+        return
+      }
+
+      if (!port) {
+        console.error(`[port] is undefined, [${configfile}] will not be used.`)
+        return
+      }
+
+      if (!target && !base) {
+        console.error(`[target] and [base] are both undefined, [${configfile}] will not be used.`)
+        return
+      }
+
+      let sh = `${pm2} start "${exe}" --name="${name}"`
+      sh += ' --'
+      sh += ` --host="${host}" --port="${port}"`
+
+      if (target) {
+        sh += ` --target="${target}"`
+      }
+
+      if (base) {
+        sh += ` --base="${base}"`
+      }
+
+      if (token) {
+        sh += ` --token="${token}"`
+      }
+
+      if (headers) {
+        sh += ` --headers="${headers}"`
+      }
+
+      if (cookies) {
+        sh += ` --cookies="${cookies}"`
+      }
+
+      if (script) {
+        const file = path.resolve(cwd, script)
+        sh += ` --script="${file}"`
+      }
+
+      console.log(sh)
+      shell.exec(sh)
+    }
+
+    let configdir = path.join(cwd, '.egwrc')
+
+    // use .egwrc dir
+    if (fs.existsSync(configdir)) {
+      const stat = fs.statSync(configdir)
+      if (!stat.isDirectory()) {
+        console.error(`${configdir} is not a directory.`)
+        process.exit(1)
+      }
+    }
+    // use current dir
+    else {
+      configdir = cwd
+    }
+
+    const files = fs.readdirSync(configdir)
+    files.forEach((filename) => {
+      if (filename.split('.').pop() !== 'egwrc') {
+        return
+      }
+      const configfile = path.join(configdir, filename)
+      run(configfile)
+    })
+  })
+
+program
+  .command('off')
+  .action(() => {
+    const bye = (configfile) => {
+      const config = dotenv.parse(fs.readFileSync(configfile))
+      const {
+        name,
+      } = config
+
+      if (!name) {
+        console.error(`[name] is undefined, [.egwrc${i}] will not be used.`)
+        return
+      }
+
+      shell.exec(`${pm2} delete ${name}`)
+    }
+
+    let configdir = path.join(cwd, '.egwrc')
+
+    // use .egwrc dir
+    if (fs.existsSync(configdir)) {
+      const stat = fs.statSync(configdir)
+      if (!stat.isDirectory()) {
+        console.error(`${configdir} is not a directory.`)
+        process.exit(1)
+      }
+    }
+    // use current dir
+    else {
+      configdir = cwd
+    }
+
+    const files = fs.readdirSync(configdir)
+    files.forEach((filename) => {
+      if (filename.split('.').pop() !== 'egwrc') {
+        return
+      }
+      const configfile = path.join(configdir, filename)
+      bye(configfile)
+    })
   })
 
 program

@@ -97,11 +97,18 @@ if (headers) {
 }
 
 if (script && fs.existsSync(script)) {
-  const callback = require(script)
-  const output = callback.call(gateway, args)
-  // replace original gateway instance
-  if (output instanceof GateWay) {
-    gateway = output
+  const ext = script.split('.').pop()
+  if (ext === 'js') {
+    const callback = require(script)
+    const output = callback.call(gateway, args)
+    // replace original gateway instance
+    if (output instanceof GateWay) {
+      gateway = output
+    }
+  }
+  else if (ext === 'json') {
+    const rules = require(script)
+    gateway.parse(rules)
   }
 }
 
