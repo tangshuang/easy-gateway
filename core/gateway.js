@@ -149,106 +149,112 @@ class GateWay extends Core {
       }
     }
 
+    if (!rules) {
+      return
+    }
+
     this.clear()
-    rules.forEach((rule) => {
-      if (rule && typeof rule === 'object' && !Array.isArray(rule)) {
-        const { route, rewrite, retarget, request, response, rebase } = rule
-        if (!route) {
-          return
-        }
-
-        const rule = {}
-
-        if (rewrite) {
-          rule.rewrite = (req) => {
-            const { originalUrl } = req
-            if (match(originalUrl, route)) {
-              return rewrite
-            }
-          }
-        }
-
-        if (retarget) {
-          rule.retarget = (req) => {
-            const { originalUrl } = req
-            if (match(originalUrl, route)) {
-              return retarget
-            }
-          }
-        }
-
-        if (request) {
-          rule.request = (proxyReq, req) => {
-            const { originalUrl } = req
-            if (!match(originalUrl, route)) {
-              return
-            }
-
-            if (cookies) {
-              const originalCookies = req.headers.cookie
-              const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
-              proxyReq.setHeader('Cookie', newCookies)
-            }
-
-            const { headers = {}, cookies = '' } = request
-            each(headers, (value, key) => {
-              proxyReq.setHeader(key, value)
-            })
-          }
-        }
-
-        if (response) {
-          rule.response = (proxyRes, req, res) => {
-            const { originalUrl } = req
-            if (!match(originalUrl, route)) {
-              return
-            }
-
-            const { headers = {}, cookies = {}, data } = request
-
-            proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'] || []
-            each(cookies, (value, key) => {
-              const cookie = Cookie.serialize(key, value, {
-                httpOnly: true,
-                maxAge: 3600*12,
-              })
-              proxyRes.headers['set-cookie'].push(cookie)
-            })
-
-            each(headers, (value, key) => {
-              proxyRes.headers[key] = value
-            })
-
-            // change the output json
-            if (data && isObject(data)) {
-              modifyProxyJson(res, proxyRes, (json) => {
-                const scope = new ScopeX(json)
-                const output = {}
-                each(data, (exp, key) => {
-                  const value = scope.parse(exp)
-                  output[key] = value
-                })
-                return output
-              })
-            }
-          }
-        }
-
-        if (rebase) {
-          rule.serve = (req, res) => {
-            const { originalUrl } = req
-            if (!match(originalUrl, route)) {
-              return false
-            }
-
-            const dir = path.resolve(cwd, rebase)
-            express.static(dir)(req, res, finalhandler(req, res))
-            return true
-          }
-        }
-
-        this.use(rule)
+    rules.forEach((item) => {
+      if (!isObject(item)) {
+        return
       }
+
+      const { route, rewrite, retarget, request, response, rebase } = item
+      if (!route) {
+        return
+      }
+
+      const rule = {}
+
+      if (rewrite) {
+        rule.rewrite = (req) => {
+          const { originalUrl } = req
+          if (match(originalUrl, route)) {
+            return rewrite
+          }
+        }
+      }
+
+      if (retarget) {
+        rule.retarget = (req) => {
+          const { originalUrl } = req
+          if (match(originalUrl, route)) {
+            return retarget
+          }
+        }
+      }
+
+      if (request) {
+        rule.request = (proxyReq, req) => {
+          const { originalUrl } = req
+          if (!match(originalUrl, route)) {
+            return
+          }
+
+          if (cookies) {
+            const originalCookies = req.headers.cookie
+            const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
+            proxyReq.setHeader('Cookie', newCookies)
+          }
+
+          const { headers = {}, cookies = '' } = request
+          each(headers, (value, key) => {
+            proxyReq.setHeader(key, value)
+          })
+        }
+      }
+
+      if (response) {
+        rule.response = (proxyRes, req, res) => {
+          const { originalUrl } = req
+          if (!match(originalUrl, route)) {
+            return
+          }
+
+          const { headers = {}, cookies = {}, data } = request
+
+          proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'] || []
+          each(cookies, (value, key) => {
+            const cookie = Cookie.serialize(key, value, {
+              httpOnly: true,
+              maxAge: 3600*12,
+            })
+            proxyRes.headers['set-cookie'].push(cookie)
+          })
+
+          each(headers, (value, key) => {
+            proxyRes.headers[key] = value
+          })
+
+          // change the output json
+          if (data && isObject(data)) {
+            modifyProxyJson(res, proxyRes, (json) => {
+              const scope = new ScopeX(json)
+              const output = {}
+              each(data, (exp, key) => {
+                const value = scope.parse(exp)
+                output[key] = value
+              })
+              return output
+            })
+          }
+        }
+      }
+
+      if (rebase) {
+        rule.serve = (req, res) => {
+          const { originalUrl } = req
+          if (!match(originalUrl, route)) {
+            return false
+          }
+
+          const dir = path.resolve(cwd, rebase)
+          express.static(dir)(req, res, finalhandler(req, res))
+          return true
+        }
+      }
+
+      this.use(rule)
     })
   }
 }
