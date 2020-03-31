@@ -1,7 +1,6 @@
 const Core = require('./core.js')
 const { asyncMap, asyncIterate } = require('asw')
 const { createSafeExp, each, isObject } = require('ts-fns')
-const Cookie = require('cookie')
 const modifyProxyJson = require('node-http-proxy-json')
 const ScopeX = require('scopex')
 const express = require('express')
@@ -211,15 +210,13 @@ class GateWay extends Core {
             return
           }
 
-          const { headers = {}, cookies = {}, data } = request
+          const { headers = {}, cookies = {}, data } = response
 
-          proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'] || []
           each(cookies, (value, key) => {
-            const cookie = Cookie.serialize(key, value, {
+            res.cookie(key, value, {
               httpOnly: true,
               maxAge: 3600*12,
             })
-            proxyRes.headers['set-cookie'].push(cookie)
           })
 
           each(headers, (value, key) => {

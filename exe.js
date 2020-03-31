@@ -2,7 +2,6 @@ const Proxier = require('./core/proxier.js')
 const GateWay = require('./core/gateway.js')
 
 const args = require('process.args')(1)
-const Cookie = require('cookie')
 const fs = require('fs')
 const path = require('path')
 
@@ -58,14 +57,11 @@ if (tokenValue) {
       else {
         throw new Error('Did not recieve token.')
       }
-    },
-    response(proxyRes) {
-      const tokenCookie = Cookie.serialize(COOKIE_TOKEN_KEY, tokenValue, {
+
+      res.cookie(COOKIE_TOKEN_KEY, tokenValue, {
         httpOnly: true,
         maxAge: 3600*12,
       })
-      proxyRes.headers['set-cookie'] = proxyRes.headers['set-cookie'] || []
-      proxyRes.headers['set-cookie'].push(tokenCookie)
     },
   })
 }

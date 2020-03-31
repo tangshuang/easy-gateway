@@ -20,7 +20,6 @@
   "dependencies": {
     "asw": "^1.2.0",
     "commander": "^4.1.1",
-    "cookie": "^0.4.0",
     "cookie-parser": "^1.4.4",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
