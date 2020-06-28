@@ -34,11 +34,11 @@ program
 
 program
   .command('start')
-  .option('--name [name]')
+  .option('--name [name]', 'use this name to setup a deamon server')
   .option('--script [script]', 'the js file to run which modify GateWay.')
   .option('--host [host]', 'which host to serve up a proxy server, default is 127.0.0.1')
   .option('--port [port]', 'which port to serve up for your proxy server')
-  .option('--target [target]', 'proxy target, i.e. http://my-proxy.web.com:1080')
+  .option('--target [target]', 'proxy target, i.e. http://my-target.web.com:1080')
   .option('--base [base]', 'the static files to serve up')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
@@ -57,7 +57,7 @@ program
     Object.assign(params, options)
 
     const {
-      name = dirname,
+      name,
       host = '0.0.0.0',
       token = '',
       headers = '',
@@ -76,7 +76,13 @@ program
       base = '.'
     }
 
-    let sh = `${pm2} start "${exe}" --name="${name}"`
+    let sh = `node "${exe}"`
+
+    // use pm2 to start a given deamon server
+    if (name) {
+      sh = `${pm2} start "${exe}" --name="${name}"`
+    }
+
     if (debug) {
       sh += ' --no-daemon'
     }
@@ -122,7 +128,8 @@ program
 
     console.log(sh)
 
-    if (debug) {
+    // stop server at the begin
+    if (name && debug) {
       shell.exec(`${pm2} stop ${name}`)
     }
     shell.exec(sh)

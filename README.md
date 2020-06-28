@@ -16,11 +16,11 @@ egw start --target=[target]
 
 Params:
 
-- name: this server's name, should be unique, use current diranme as default
-- host: which ip to bind, 127.0.0.1 or 0.0.0.0 or others
-- port: which port to serve
-- target: which target to proxy to, give the target url
-- base: which dirs/files to serve up as static
+- name: optional, when set, it will be deamon server's name, should be unique, if not set, just run in cli
+- host: which ip to bind, 127.0.0.1 or 0.0.0.0 (default) or others
+- port: which port to serve (default random between 10000 and 20000)
+- target: which target url to proxy to
+- base: which dirs/files to serve up as static content base
 - token: if set, you should given token to access this server by queryString ?token=xxx
 - cookies: if set, the request to target will keep this cookie (original cookie as well)
 - headers: if set, http HEADER will be overrided

@@ -7,7 +7,7 @@ const GateWay = require('./gateway.js')
 
 class Proxier extends Core {
   init(options) {
-    const UNAVAILABLE = 'http://127.0.0.1:65535'
+    const UNAVAILABLE = 'http://127.0.0.1:65530'
     const { target = UNAVAILABLE, base, gateway = new GateWay(), ...others } = options
 
     const app = express()
