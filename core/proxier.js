@@ -2,13 +2,20 @@ const express = require('express')
 const { HttpProxyMiddleware } = require('http-proxy-middleware/dist/http-proxy-middleware.js')
 const cookieParser = require('cookie-parser')
 
+const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
 const GateWay = require('./gateway.js')
 
 class Proxier extends Core {
   init(options) {
-    const UNAVAILABLE = 'http://127.0.0.1:65530'
-    const { target = UNAVAILABLE, base, gateway = new GateWay(), ...others } = options
+    const {
+      base,
+      gateway = new GateWay(),
+      host,
+      port = 65530,
+      target = 'http://127.0.0.1:' + port,
+      ...others
+    } = options
 
     const app = express()
 

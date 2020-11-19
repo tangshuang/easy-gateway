@@ -82,12 +82,13 @@ program
     if (name) {
       sh = `${pm2} start "${exe}" --name="${name}"`
     }
-
-    if (debug) {
+    if (name && debug) {
       sh += ' --no-daemon'
     }
+    if (name) {
+      sh += ' --'
+    }
 
-    sh += ' --'
     sh += ` --host="${host}" --port="${port}"`
 
     if (target) {
@@ -99,7 +100,7 @@ program
     }
 
     if (token) {
-      if (token === true) {
+      if (token === true || token === 'true') {
         // create a random token
         const randomStr = createRandomStr()
         sh += ` --token="${randomStr}"`
@@ -128,10 +129,11 @@ program
 
     console.log(sh)
 
-    // stop server at the begin
-    if (name && debug) {
+    // stop previous server at the begin
+    if (name) {
       shell.exec(`${pm2} stop ${name}`)
     }
+
     shell.exec(sh)
   })
 
