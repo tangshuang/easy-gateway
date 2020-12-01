@@ -9,13 +9,18 @@ const GateWay = require('./gateway.js')
 class Proxier extends Core {
   init(options) {
     const {
+      host,
+      port,
       base,
       gateway = new GateWay(),
-      host,
-      port = 65530,
-      target = 'http://127.0.0.1:' + port,
+      target = UNAVAILABLE,
       ...others
     } = options
+
+    this.host = host
+    this.port = port
+    this.base = base
+    this.target = target
 
     const app = express()
 
@@ -97,8 +102,9 @@ class Proxier extends Core {
     this.app = app
   }
   start() {
-    const { port, host } = this.options
+    const { port, host, base, target } = this
     this.httpServer = this.app.listen(port, host)
+    console.log(`Server up at ${host}:${port}, proxy to ${target}, base in ${base}`)
   }
   stop() {
     this.httpServer.close()
