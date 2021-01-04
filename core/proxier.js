@@ -97,6 +97,16 @@ class Proxier extends Core {
     })
     app.use(middleware)
 
+    // 404 fallback
+    if (base && base.length > 0) {
+      if (Array.isArray(base) && base.length === 1) {
+        app.get('*', express.static(base[0]))
+      }
+      else if (typeof base === 'string') {
+        app.get('*', express.static(base))
+      }
+    }
+
     this.options = options
     this.gateway = gateway
     this.app = app
