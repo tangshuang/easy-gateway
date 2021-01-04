@@ -43,6 +43,7 @@ program
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
   .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
+  .option('--prefix [prefix]', 'proxy url prefix, i.e. /api;;/auth.token;;/some/subapi')
   .option('--debug [debug]')
   .action((options) => {
     const params = {}
@@ -66,6 +67,7 @@ program
       target,
       script,
       debug,
+      prefix,
     } = params
 
     let {
@@ -121,6 +123,10 @@ program
     if (script) {
       const file = path.resolve(cwd, script)
       sh += ` --script="${file}"`
+    }
+
+    if (prefix) {
+      sh += ` --prefix="${prefix}"`
     }
 
     if (debug) {

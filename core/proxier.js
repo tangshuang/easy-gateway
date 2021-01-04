@@ -18,6 +18,7 @@ class Proxier extends Core {
       base,
       gateway = new GateWay(),
       target = UNAVAILABLE,
+      prefix,
       ...others
     } = options
 
@@ -64,16 +65,6 @@ class Proxier extends Core {
       }
     })
 
-    // 404 fallback to index.html
-    // notice, only when pass `base` without target will work
-    if (base && base.length > 0 && target === UNAVAILABLE) {
-      const dir = Array.isArray(base) ? base[0] : base
-      const index = path.join(dir, 'index.html')
-      if (fs.existsSync(index)) {
-        app.use(fallback(index))
-      }
-    }
-
     // we should must serve up a proxy middleware server,
     // or when we push some gateway rules, we will lose the proxy feature
     // if a dev did not pass target, use a unavailable localhost address instead
@@ -110,7 +101,26 @@ class Proxier extends Core {
       }
       logError(err, req, res)
     })
-    app.use(middleware)
+
+    if (Array.isArray(prefix)) {
+      prefix.forEach((prefix) => app.use(prefix, middleware))
+    }
+    else if (typeof prefix === 'string' || prefix instanceof RegExp) {
+      app.use(prefix, middleware)
+    }
+    else {
+      app.use(middleware)
+    }
+
+    // 404 fallback to index.html
+    // notice, only when pass `base` without target will work
+    if (base && base.length > 0) {
+      const dir = Array.isArray(base) ? base[0] : base
+      const index = path.join(dir, 'index.html')
+      if (fs.existsSync(index)) {
+        app.use(fallback(index))
+      }
+    }
 
     this.options = options
     this.gateway = gateway
