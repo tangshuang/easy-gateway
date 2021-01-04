@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const fs = require('fs')
 const fallback = require('express-history-api-fallback')
+const path = require('path')
 
 const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
