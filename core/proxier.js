@@ -2,6 +2,8 @@ const express = require('express')
 const { HttpProxyMiddleware } = require('http-proxy-middleware/dist/http-proxy-middleware.js')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
+const fs = require('fs')
+const fallback = require('express-history-api-fallback')
 
 const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
@@ -99,13 +101,12 @@ class Proxier extends Core {
     })
     app.use(middleware)
 
-    // 404 fallback
-    if (base && base.length > 0) {
-      if (Array.isArray(base) && base.length === 1) {
-        app.get('*', express.static(base[0]))
-      }
-      else if (typeof base === 'string') {
-        app.get('*', express.static(base))
+    // 404 fallback to index.html
+    if (base && base.length > 0 && target === UNAVAILABLE) {
+      const dir = Array.isArray(base) ? base[0] : base
+      const index = path.join(dir, 'index.html')
+      if (fs.existsSync(index)) {
+        app.use(fallback(index))
       }
     }
 
