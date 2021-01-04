@@ -1,6 +1,7 @@
 const express = require('express')
 const { HttpProxyMiddleware } = require('http-proxy-middleware/dist/http-proxy-middleware.js')
 const cookieParser = require('cookie-parser')
+const cors = require('cors')
 
 const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
@@ -24,6 +25,7 @@ class Proxier extends Core {
 
     const app = express()
 
+    app.use(cors())
     app.use(cookieParser())
     app.use(async function(req, res, next) {
       try {
