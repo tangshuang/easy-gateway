@@ -43,7 +43,7 @@ program
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
   .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
-  .option('--prefix [prefix]', 'proxy url prefix, i.e. /api;;/auth.token;;/some/subapi')
+  .option('--proxy [proxy]', 'proxy, i.e. /api->https://localhost:8080;;/auth.token->http://some.com;;/some/subapi->http://any.com/any')
   .option('--debug [debug]')
   .action((options) => {
     const params = {}
@@ -67,7 +67,7 @@ program
       target,
       script,
       debug,
-      prefix,
+      proxy,
     } = params
 
     let {
@@ -125,8 +125,8 @@ program
       sh += ` --script="${file}"`
     }
 
-    if (prefix) {
-      sh += ` --prefix="${prefix}"`
+    if (proxy) {
+      sh += ` --proxy="${proxy}"`
     }
 
     if (debug) {

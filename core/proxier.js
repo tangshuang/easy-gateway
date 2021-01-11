@@ -1,5 +1,6 @@
 const express = require('express')
 const { HttpProxyMiddleware } = require('http-proxy-middleware/dist/http-proxy-middleware.js')
+const { createProxyMiddleware } = require('http-proxy-middleware')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const fs = require('fs')
@@ -18,7 +19,7 @@ class Proxier extends Core {
       base,
       gateway = new GateWay(),
       target = UNAVAILABLE,
-      prefix,
+      proxy,
       ...others
     } = options
 
@@ -51,6 +52,17 @@ class Proxier extends Core {
       })
     }
 
+    // proxy is set like ['/api->http://localhost:8080', '/download->http://localhost:8080']
+    if (Array.isArray(proxy)) {
+      proxy.forEach((item) => {
+        const [uri, target] = item.split('->')
+        app.use(uri, createProxyMiddleware({
+          target,
+          changeOrigin: true,
+        }))
+      })
+    }
+
     app.use(async function(req, res, next) {
       try {
         const end = await gateway.serve(req, res)
@@ -65,61 +77,54 @@ class Proxier extends Core {
       }
     })
 
-    // we should must serve up a proxy middleware server,
-    // or when we push some gateway rules, we will lose the proxy feature
-    // if a dev did not pass target, use a unavailable localhost address instead
-    const proxyObj = new HttpProxyMiddleware({
-      target,
-      changeOrigin: true,
-      ...others,
-      async pathRewrite(path, req) {
-        return await gateway.rewrite(req, path) || path
-      },
-      async router(req) {
-        return await gateway.retarget(req, target) || target
-      },
-      onProxyReq(proxyReq, req, res) {
-        gateway.request(proxyReq, req, res)
-      },
-      onProxyRes(proxyRes, req, res) {
-        gateway.response(proxyRes, req, res)
-      },
-      onError(err, req, res) {
-        if (target === UNAVAILABLE) {
-          res.status(404).end('Not Found!')
-        }
-      },
-    })
-
-    const { middleware, logError, proxy } = proxyObj
-
-    // override logError, so that it will not throw error when proxy to UNAVAILABLE
-    proxy.removeListener('error', logError)
-    proxy.on('error', (err, req, res) => {
-      if (err.code === 'ECONNREFUSED' && target === UNAVAILABLE) {
-        return
-      }
-      logError(err, req, res)
-    })
-
-    if (Array.isArray(prefix)) {
-      prefix.forEach((prefix) => app.use(prefix, middleware))
-    }
-    else if (typeof prefix === 'string' || prefix instanceof RegExp) {
-      app.use(prefix, middleware)
-    }
-    else {
-      app.use(middleware)
-    }
-
-    // 404 fallback to index.html
-    // notice, only when pass `base` without target will work
-    if (base && base.length > 0) {
+    if (base && base.length > 0 && Array.isArray(proxy)) {
+      // 404 fallback to index.html
+      // notice, only when pass `base` without target will work
       const dir = Array.isArray(base) ? base[0] : base
       const index = path.join(dir, 'index.html')
       if (fs.existsSync(index)) {
         app.use(fallback(index))
       }
+    }
+    else {
+      // we should must serve up a proxy middleware server,
+      // or when we push some gateway rules, we will lose the proxy feature
+      // if a dev did not pass target, use a unavailable localhost address instead
+      const proxyObj = new HttpProxyMiddleware({
+        target,
+        changeOrigin: true,
+        ...others,
+        async pathRewrite(path, req) {
+          return await gateway.rewrite(req, path) || path
+        },
+        async router(req) {
+          return await gateway.retarget(req, target) || target
+        },
+        onProxyReq(proxyReq, req, res) {
+          gateway.request(proxyReq, req, res)
+        },
+        onProxyRes(proxyRes, req, res) {
+          gateway.response(proxyRes, req, res)
+        },
+        onError(err, req, res) {
+          if (target === UNAVAILABLE) {
+            res.status(404).end('Not Found!')
+          }
+        },
+      })
+
+      const { middleware, logError, proxy } = proxyObj
+
+      // override logError, so that it will not throw error when proxy to UNAVAILABLE
+      proxy.removeListener('error', logError)
+      proxy.on('error', (err, req, res) => {
+        if (err.code === 'ECONNREFUSED' && target === UNAVAILABLE) {
+          return
+        }
+        logError(err, req, res)
+      })
+
+      app.use(middleware)
     }
 
     this.options = options
