@@ -61,8 +61,9 @@ class Proxier extends Core {
         const { origin } = url
         const uri = to.replace(origin, '')
         const config = {
-          target: origin,
           changeOrigin: true,
+          ...others,
+          target: origin,
         }
         if (uri && uri !== from) {
           config.pathRewrite = {
@@ -101,9 +102,9 @@ class Proxier extends Core {
       // or when we push some gateway rules, we will lose the proxy feature
       // if a dev did not pass target, use a unavailable localhost address instead
       const proxyObj = new HttpProxyMiddleware({
-        target,
         changeOrigin: true,
         ...others,
+        target,
         async pathRewrite(path, req) {
           return await gateway.rewrite(req, path) || path
         },
