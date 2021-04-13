@@ -56,10 +56,17 @@ class Proxier extends Core {
     // proxy is set like ['/api->http://localhost:8080', '/download->http://localhost:8080']
     if (Array.isArray(proxy)) {
       proxy.forEach((item) => {
+        if (!item.trim()) {
+          return
+        }
+
         const [from, to] = item.trim().split('->').map(item => item.trim())
+
         const url = URL.parse(to)
-        const { origin } = url
+        const { protocol, host: _host } = url
+        const origin = `${protocol}//${_host}`
         const uri = to.replace(origin, '')
+
         const config = {
           changeOrigin: true,
           ...others,
@@ -70,6 +77,7 @@ class Proxier extends Core {
             [`^${from}`]: uri,
           }
         }
+
         app.use(from, createProxyMiddleware(config))
       })
     }
