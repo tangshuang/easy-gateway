@@ -6,6 +6,7 @@ const cors = require('cors')
 const fs = require('fs')
 const fallback = require('express-history-api-fallback')
 const path = require('path')
+const URL = require('url')
 
 const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
@@ -55,11 +56,20 @@ class Proxier extends Core {
     // proxy is set like ['/api->http://localhost:8080', '/download->http://localhost:8080']
     if (Array.isArray(proxy)) {
       proxy.forEach((item) => {
-        const [uri, target] = item.split('->')
-        app.use(uri, createProxyMiddleware({
-          target,
+        const [from, to] = item.trim().split('->').map(item => item.trim())
+        const url = new URL(to)
+        const { origin } = url
+        const uri = to.replace(origin, '')
+        const config = {
+          target: origin,
           changeOrigin: true,
-        }))
+        }
+        if (uri && uri !== from) {
+          config.pathRewrite = {
+            [`^${from}`]: uri,
+          }
+        }
+        app.use(from, createProxyMiddleware(config))
       })
     }
 
