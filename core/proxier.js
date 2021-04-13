@@ -57,7 +57,7 @@ class Proxier extends Core {
     if (Array.isArray(proxy)) {
       proxy.forEach((item) => {
         const [from, to] = item.trim().split('->').map(item => item.trim())
-        const url = new URL(to)
+        const url = URL.parse(to)
         const { origin } = url
         const uri = to.replace(origin, '')
         const config = {
