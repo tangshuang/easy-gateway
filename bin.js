@@ -68,6 +68,7 @@ program
       script,
       debug,
       proxy,
+      secure,
     } = params
 
     let {
@@ -127,6 +128,10 @@ program
 
     if (proxy) {
       sh += ` --proxy="${proxy}"`
+    }
+
+    if (secure === 'false') {
+      sh += ` --secure=false`
     }
 
     if (debug) {
