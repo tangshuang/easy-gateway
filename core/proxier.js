@@ -69,6 +69,7 @@ class Proxier extends Core {
 
         const config = {
           changeOrigin: true,
+          secure: false,
           ...others,
           target: origin,
         }
