@@ -113,6 +113,7 @@ class Proxier extends Core {
       // if a dev did not pass target, use a unavailable localhost address instead
       const proxyObj = new HttpProxyMiddleware({
         changeOrigin: true,
+        secure,
         ...others,
         target,
         async pathRewrite(path, req) {
