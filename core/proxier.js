@@ -21,6 +21,7 @@ class Proxier extends Core {
       gateway = new GateWay(),
       target = UNAVAILABLE,
       proxy,
+      secure,
       ...others
     } = options
 
@@ -69,7 +70,7 @@ class Proxier extends Core {
 
         const config = {
           changeOrigin: true,
-          secure: false,
+          secure,
           ...others,
           target: origin,
         }

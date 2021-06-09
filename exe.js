@@ -18,6 +18,7 @@ const {
   cookies = '',
   debug = false,
   proxy,
+  secure = true,
 } = args
 
 // allow set --token=tokenKey:tokenValue
@@ -118,5 +119,6 @@ const proxier = new Proxier({
   gateway,
   logLevel: debug && 'info',
   proxy: proxy && proxy.split(';;'),
+  secure,
 })
 proxier.start()
