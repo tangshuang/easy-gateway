@@ -119,6 +119,6 @@ const proxier = new Proxier({
   gateway,
   logLevel: debug && 'info',
   proxy: proxy && proxy.split(';;'),
-  secure,
+  secure: secure !== false && secure !== 'false',
 })
 proxier.start()
