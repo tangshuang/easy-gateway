@@ -42,7 +42,8 @@ program
   .option('--base [base]', 'the static files to serve up')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--cookies [cookies]', 'cookies which will be appended with original cookies')
-  .option('--headers [headers]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
+  .option('--proxyHeaders [proxyHeaders]', 'headers to be send by proxier to target, i.e. --headers=Token:xxx,Auth:xxx')
+  .option('--headers [headers]', 'headers to be send to client by http response, i.e. --headers=Access-Control-Allow-Origin:*')
   .option('--proxy [proxy]', 'proxy, i.e. /api->https://localhost:8080;;/auth.token->http://some.com;;/some/subapi->http://any.com/any')
   .option('--debug [debug]')
   .action((options) => {
@@ -62,6 +63,7 @@ program
       host = '0.0.0.0',
       token = '',
       headers = '',
+      proxyHeaders = '',
       cookies = '',
       port = createRandomNum(10000, 20000), // default random port
       target,
@@ -111,6 +113,10 @@ program
       else {
         sh += ` --token="${token}"`
       }
+    }
+
+    if (proxyHeaders) {
+      sh += ` --proxyHeaders="${proxyHeaders}"`
     }
 
     if (headers) {
@@ -213,6 +219,10 @@ program
 
       if (token) {
         sh += ` --token="${token}"`
+      }
+
+      if (proxyHeaders) {
+        sh += ` --proxyHeaders=${proxyHeaders}`
       }
 
       if (headers) {

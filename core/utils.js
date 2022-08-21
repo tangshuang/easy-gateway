@@ -15,7 +15,17 @@ function createRandomNum(min, max) {
   return value
 }
 
+function tryParseJson(str) {
+  try {
+    return JSON.parse(str)
+  }
+  catch (e) {
+    return str
+  }
+}
+
 module.exports = {
   createRandomStr,
   createRandomNum,
+  tryParseJson,
 }

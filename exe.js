@@ -4,6 +4,7 @@ const GateWay = require('./core/gateway.js')
 const args = require('process.args')(1)
 const fs = require('fs')
 const path = require('path')
+const { tryParseJson } = require('./core/utils')
 
 const cwd = process.cwd()
 
@@ -14,7 +15,8 @@ const {
   target,
   base = '',
   token = '',
-  headers = '',
+  headers: resHeaders = '',
+  proxyHeaders = '',
   cookies = '',
   debug = false,
   proxy,
@@ -29,6 +31,21 @@ const HEADER_TOKEN_KEY = 'EGW-TOKEN'
 const COOKIE_TOKEN_KEY = HEADER_TOKEN_KEY + '-' + port
 
 let gateway = new GateWay()
+if (script && fs.existsSync(script)) {
+  const ext = script.split('.').pop()
+  if (ext === 'json') {
+    const rules = require(script)
+    gateway.parse(rules)
+  }
+  else {
+    const callback = require(script)
+    const output = callback.call(gateway, args)
+    // replace original gateway instance
+    if (output instanceof GateWay) {
+      gateway = output
+    }
+  }
+}
 
 if (tokenValue) {
   gateway.use({
@@ -79,38 +96,38 @@ if (cookies) {
 }
 
 // headers comes later after cookies, so that, dev can override Cookie by using `headers="Cookie: a=1; b=2"`
-if (headers) {
-  const items = headers.split(';;').filter(item => !!item)
+if (proxyHeaders) {
+  const items = proxyHeaders.split(';;').filter(Boolean)
   gateway.use({
     request(proxyReq) {
       items.forEach((item) => {
         const [key, ...values] = item.split(':')
         const value = values.join(':') // the value may contain :, i.e. "Some: this is the value: 1;;"
         if (key && value) {
-          proxyReq.setHeader(key.trim(), value.trim())
+          proxyReq.setHeader(key.trim(), tryParseJson(value.trim()))
         }
       })
     },
   })
 }
 
-if (script && fs.existsSync(script)) {
-  const ext = script.split('.').pop()
-  if (ext === 'js') {
-    const callback = require(script)
-    const output = callback.call(gateway, args)
-    // replace original gateway instance
-    if (output instanceof GateWay) {
-      gateway = output
+let headers = null
+if (resHeaders) {
+  const items = resHeaders.split(';;').filter(Boolean)
+  const obj = {}
+  items.forEach((item) => {
+    const [key, ...values] = item.split(':')
+    const value = values.join(':') // the value may contain :, i.e. "Some: this is the value: 1;;"
+    if (key && value) {
+      obj[key.trim()] = tryParseJson(value.trim())
     }
-  }
-  else if (ext === 'json') {
-    const rules = require(script)
-    gateway.parse(rules)
+  })
+  if (items.length) {
+    headers = obj
   }
 }
 
-const files = base.split(';;').filter(item => !!item).map(item => path.resolve(cwd, item))
+const files = base.split(';;').filter(Boolean).map(item => path.resolve(cwd, item))
 const proxier = new Proxier({
   host,
   port,
@@ -119,6 +136,7 @@ const proxier = new Proxier({
   gateway,
   logLevel: debug && 'info',
   proxy: proxy && proxy.split(';;'),
-  secure: secure !== false && secure !== 'false',
+  secure: secure && secure !== 'false',
+  headers,
 })
 proxier.start()

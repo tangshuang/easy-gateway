@@ -23,7 +23,9 @@ Params:
 - base: which dirs/files to serve up as static content base
 - token: if set, you should given token to access this server by queryString ?token=xxx
 - cookies: if set, the request to target will keep this cookie (original cookie as well)
-- headers: if set, http HEADER will be overrided
+- proxy: if set, the rules will be used as proxy, i.e. /api->http://localhost:9999/api;;/doc->/docs, notice use `->` to point source and target
+- proxyHeaders: if set, http request HEADERS send by proxier will be set
+- headers: if set, http response HEADERS will be set
 - debug: if set, you can see the log in console
 - script: a js file to operate gateway
 

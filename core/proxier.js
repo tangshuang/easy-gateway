@@ -2,7 +2,6 @@ const express = require('express')
 const { HttpProxyMiddleware } = require('http-proxy-middleware/dist/http-proxy-middleware.js')
 const { createProxyMiddleware } = require('http-proxy-middleware')
 const cookieParser = require('cookie-parser')
-const cors = require('cors')
 const fs = require('fs')
 const fallback = require('express-history-api-fallback')
 const path = require('path')
@@ -11,6 +10,7 @@ const URL = require('url')
 const UNAVAILABLE = 'http://127.0.0.1:65530'
 const Core = require('./core.js')
 const GateWay = require('./gateway.js')
+const { tryParseJson } = require('./utils')
 
 class Proxier extends Core {
   init(options) {
@@ -22,6 +22,7 @@ class Proxier extends Core {
       target = UNAVAILABLE,
       proxy,
       secure,
+      headers,
       ...others
     } = options
 
@@ -32,8 +33,16 @@ class Proxier extends Core {
 
     const app = express()
 
-    app.use(cors())
     app.use(cookieParser())
+    if (headers) {
+      app.use((req, res, next) => {
+        Object.keys(headers).forEach((key) => {
+          const value = tryParseJson(headers[key])
+          res.setHeader(key, value)
+        })
+      })
+    }
+
     app.use(async function(req, res, next) {
       try {
         await gateway.auth(req, res)
