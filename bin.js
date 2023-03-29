@@ -277,7 +277,7 @@ program
       } = config
 
       if (!name) {
-        console.error(`[name] is undefined, ${configfile} will not be used.`)
+        console.error(`[name] is undefined, [${configfile}] will not be used.`)
         return
       }
 
@@ -290,7 +290,7 @@ program
     if (fs.existsSync(configdir)) {
       const stat = fs.statSync(configdir)
       if (!stat.isDirectory()) {
-        console.error(`${configdir} is not a directory.`)
+        console.error(`[${configdir}] is not a directory.`)
         process.exit(1)
       }
     }

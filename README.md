@@ -54,6 +54,19 @@ Params:
 
 - name: the server to stop, use current dirname as default
 
+```
+egw on
+```
+
+Setup domean all `.egwrc` files which contains `name` in `.egwrc` directory.
+
+
+```
+egw off
+```
+
+Down all `.egwrc` files which contains `name` in `.egwrc` directory.
+
 ## API
 
 The `script` param allow you to define your own gateway:
