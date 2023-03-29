@@ -21,13 +21,19 @@ Params:
 - port: which port to serve (default random between 10000 and 20000)
 - target: which target url to proxy to
 - base: which dirs/files to serve up as static content base
-- token: if set, you should given token to access this server by queryString ?token=xxx
+- token: if set, you should given token to access this server
 - cookies: if set, the request to target will keep this cookie (original cookie as well)
 - proxy: if set, the rules will be used as proxy, i.e. /api->http://localhost:9999/api;;/doc->/docs, notice use `->` to point source and target
 - proxyHeaders: if set, http request HEADERS send by proxier will be set
 - headers: if set, http response HEADERS will be set
 - debug: if set, you can see the log in console
 - script: a js file to operate gateway
+
+The `token` is special, when you pass token, your target site will be must visited with a auth token.
+`token` can also be `{token_key}:{token_value}` to match `?{token_key}={token_value}`.
+You can visit with 1/ query string `?{token_key}={token_value}`, 2/ cookie `{token_key}={token_value}`, 3/ http headers `"{token_key}": "{token_value}"`.
+`{token_key}` is default if not passed as `token` when use query string, as `EGW-TOKEN-{PORT}` when use cookie, as `EGW-TOKEN` when use headers.
+When you visit visit with query string, cookie will be set too, so you can visit again without query string with cookie.
 
 If you want to maintain this params, you can create a `.egwrc` file in your dir, and put this params in it, like:
 

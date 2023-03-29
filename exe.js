@@ -56,30 +56,35 @@ if (tokenValue) {
       // we must use req.get to get header to ignore case-insensitive problem
       const headerToken = req.get(HEADER_TOKEN_KEY)
 
+      const setCookie = () => {
+        res.cookie(COOKIE_TOKEN_KEY, tokenValue, {
+          httpOnly: true,
+        })
+      }
+
       if (queryToken) {
         if (queryToken !== tokenValue) {
           res.clearCookie(COOKIE_TOKEN_KEY)
           throw new Error('query?token does not match token.')
         }
+        setCookie()
       }
       else if (cookieToken) {
         if (cookieToken !== tokenValue) {
           res.clearCookie(COOKIE_TOKEN_KEY)
           throw new Error(`cookies[${COOKIE_TOKEN_KEY}] does not match token.`)
         }
+        setCookie()
       }
       else if (headerToken) {
         if (headerToken !== tokenValue) {
-          throw new Error(`HEADER[${HEADER_TOKEN_KEY}] does not match token.`)
+          throw new Error(`HEADERS[${HEADER_TOKEN_KEY}] does not match token.`)
         }
+        // when use headers, we do not need to set cookie
       }
       else {
         throw new Error('Did not recieve token.')
       }
-
-      res.cookie(COOKIE_TOKEN_KEY, tokenValue, {
-        httpOnly: true,
-      })
     },
   })
 }
