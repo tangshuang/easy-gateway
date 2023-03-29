@@ -79,7 +79,6 @@ if (tokenValue) {
 
       res.cookie(COOKIE_TOKEN_KEY, tokenValue, {
         httpOnly: true,
-        maxAge: 3600*12,
       })
     },
   })
