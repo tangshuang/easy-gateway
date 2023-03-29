@@ -277,7 +277,7 @@ program
       } = config
 
       if (!name) {
-        console.error(`[name] is undefined, [.egwrc${i}] will not be used.`)
+        console.error(`[name] is undefined, ${configfile} will not be used.`)
         return
       }
 
