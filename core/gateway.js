@@ -190,13 +190,14 @@ class GateWay extends Core {
             return
           }
 
+          const { headers = {}, cookies = '' } = request
+
           if (cookies) {
             const originalCookies = req.headers.cookie
             const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
             proxyReq.setHeader('Cookie', newCookies)
           }
 
-          const { headers = {}, cookies = '' } = request
           each(headers, (value, key) => {
             proxyReq.setHeader(key, value)
           })
