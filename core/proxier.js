@@ -40,6 +40,7 @@ class Proxier extends Core {
           const value = tryParseJson(headers[key])
           res.setHeader(key, value)
         })
+        next()
       })
     }
 
