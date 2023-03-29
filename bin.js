@@ -41,10 +41,12 @@ program
   .option('--target [target]', 'proxy target, i.e. http://my-target.web.com:1080')
   .option('--base [base]', 'the static files to serve up')
   .option('--token [token]', 'use should bring the token when visit your proxy server')
-  .option('--cookies [cookies]', 'cookies which will be appended with original cookies which will be sent to target and client')
-  .option('--proxyHeaders [proxyHeaders]', 'headers to be send by proxier to target, i.e. --proxyHeaders="Auth-Token:xxx;;Other-Token=xxx"')
-  .option('--headers [headers]', 'headers to be send to client in http response, i.e. --headers="Access-Control-Allow-Origin:*;;Access-Control-Allow-Methods:*"')
   .option('--proxy [proxy]', 'proxy, i.e. /api->https://localhost:8080;;/auth.token->http://some.com;;/some/subapi->http://any.com/any')
+  .option('--proxyHeaders [proxyHeaders]', 'headers to be send by proxier to target, i.e. --proxyHeaders="Auth-Token:xxx;;Other-Token=xxx"')
+  .option('--cookies [cookies]', 'cookies which will be appended with original cookies which will be sent to target, higher priority than `proxyHeaders`')
+  .option('--headers [headers]', 'headers to be send to client in http response, i.e. --headers="Access-Control-Allow-Origin:*;;Access-Control-Allow-Methods:*"')
+  .option('--cors [cors]', 'make users who visit this proxier be able to use crosss-origin ability, higher priority than `headers`')
+  .option('--secure [secure]', 'make https works')
   .option('--debug [debug]')
   .action((options) => {
     const params = {}
@@ -68,9 +70,10 @@ program
       port = createRandomNum(10000, 20000), // default random port
       target,
       script,
-      debug,
       proxy,
       secure,
+      cors,
+      debug,
     } = params
 
     let {
@@ -136,8 +139,12 @@ program
       sh += ` --proxy="${proxy}"`
     }
 
-    if (secure === 'false') {
-      sh += ` --secure=false`
+    if (secure) {
+      sh += ` --secure`
+    }
+
+    if (cors) {
+      sh += ` --cors`
     }
 
     if (debug) {
@@ -183,11 +190,15 @@ program
         host = '0.0.0.0',
         token = '',
         headers = '',
+        proxyHeaders = '',
         cookies = '',
         port,
         target,
         base,
         script,
+        proxy,
+        secure,
+        cors,
       } = config
 
       if (!name) {
@@ -236,6 +247,18 @@ program
       if (script) {
         const file = path.resolve(cwd, script)
         sh += ` --script="${file}"`
+      }
+
+      if (proxy) {
+        sh += ` --proxy="${proxy}"`
+      }
+
+      if (secure) {
+        sh += ` --secure`
+      }
+
+      if (cors) {
+        sh += ` --cors`
       }
 
       console.log(sh)

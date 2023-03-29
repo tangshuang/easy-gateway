@@ -20,7 +20,8 @@ const {
   cookies = '',
   debug = false,
   proxy,
-  secure = true,
+  secure,
+  cors,
 } = args
 
 // allow set --token=tokenKey:tokenValue
@@ -89,16 +90,6 @@ if (tokenValue) {
   })
 }
 
-if (cookies) {
-  gateway.use({
-    request(proxyReq, req) {
-      const originalCookies = req.headers.cookie
-      const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
-      proxyReq.setHeader('Cookie', newCookies)
-    },
-  })
-}
-
 // headers comes later after cookies, so that, dev can override Cookie by using `headers="Cookie: a=1; b=2"`
 if (proxyHeaders) {
   const items = proxyHeaders.split(';;').filter(Boolean)
@@ -111,6 +102,16 @@ if (proxyHeaders) {
           proxyReq.setHeader(key.trim(), tryParseJson(value.trim()))
         }
       })
+    },
+  })
+}
+
+if (cookies) {
+  gateway.use({
+    request(proxyReq, req) {
+      const originalCookies = req.headers.cookie
+      const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
+      proxyReq.setHeader('Cookie', newCookies)
     },
   })
 }
@@ -130,6 +131,13 @@ if (resHeaders) {
     headers = obj
   }
 }
+if (cors) {
+  headers = headers || {}
+  headers['Access-Control-Allow-Origin'] = '*'
+  headers['Access-Control-Allow-Headers'] = '*'
+  headers['Access-Control-Allow-Methods'] = '*'
+  headers['Access-Control-Allow-Credentials'] = 'true'
+}
 
 const files = base.split(';;').filter(Boolean).map(item => path.resolve(cwd, item))
 const proxier = new Proxier({
@@ -140,7 +148,7 @@ const proxier = new Proxier({
   gateway,
   logLevel: debug && 'info',
   proxy: proxy && proxy.split(';;'),
-  secure: secure && secure !== 'false',
+  secure: secure,
   headers,
 })
 proxier.start()
