@@ -17,7 +17,7 @@ const {
   token = '',
   headers: resHeaders = '',
   proxyHeaders = '',
-  cookies = '',
+  proxyCookies = '',
   debug = false,
   proxy,
   secure,
@@ -103,11 +103,11 @@ if (proxyHeaders) {
   })
 }
 
-if (cookies) {
+if (proxyCookies) {
   gateway.use({
     request(proxyReq, req) {
       const originalCookies = req.headers.cookie
-      const newCookies = (originalCookies ? originalCookies + '; ' : '') + cookies
+      const newCookies = (originalCookies ? originalCookies + '; ' : '') + proxyCookies
       proxyReq.setHeader('Cookie', newCookies)
     },
   })

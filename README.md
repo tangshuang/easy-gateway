@@ -24,7 +24,7 @@ Params:
 - token: if set, you should given token to access this server
 - proxy: if set, the rules will be used as proxy, i.e. /api->http://localhost:9999/api;;/doc->/docs, notice use `->` to point source and target
 - proxyHeaders: if set, http request HEADERS send by proxier will be set
-- cookies: if set, the request to target will keep this cookie (original cookie as well)
+- proxyCookies: if set, the request to target will keep this cookie (original cookie as well)
 - headers: if set, http response HEADERS will be set
 - script: a js file to operate gateway
 - secure: enable https
@@ -47,6 +47,7 @@ target=https://www.google.com
 ```
 
 And then, you will be able to not pass the params, only run `egw start`.
+Notice that, only when you give `name`, `egw start` will run in domean.
 
 ```
 egw stop
@@ -60,14 +61,14 @@ Params:
 egw on
 ```
 
-Setup domean all `.egwrc` files which contains `name` in `.egwrc` directory.
+Setup domean all `.egwrc` files which contain `name` in `.egwrc` directory.
 
 
 ```
 egw off
 ```
 
-Down all `.egwrc` files which contains `name` in `.egwrc` directory.
+Down all `.egwrc` files which contain `name` in `.egwrc` directory.
 
 ## API
 

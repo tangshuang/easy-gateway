@@ -43,7 +43,7 @@ program
   .option('--token [token]', 'use should bring the token when visit your proxy server')
   .option('--proxy [proxy]', 'proxy, i.e. /api->https://localhost:8080;;/auth.token->http://some.com;;/some/subapi->http://any.com/any')
   .option('--proxyHeaders [proxyHeaders]', 'headers to be send by proxier to target, i.e. --proxyHeaders="Auth-Token:xxx;;Other-Token=xxx"')
-  .option('--cookies [cookies]', 'cookies which will be appended with original cookies which will be sent to target, higher priority than `proxyHeaders`')
+  .option('--proxyCookies [proxyCookies]', 'cookies which will be appended with original cookies which will be sent to target, higher priority than `proxyHeaders`')
   .option('--headers [headers]', 'headers to be send to client in http response, i.e. --headers="Access-Control-Allow-Origin:*;;Access-Control-Allow-Methods:*"')
   .option('--cors [cors]', 'make users who visit this proxier be able to use crosss-origin ability, higher priority than `headers`')
   .option('--secure [secure]', 'make https works')
@@ -66,7 +66,7 @@ program
       token = '',
       headers = '',
       proxyHeaders = '',
-      cookies = '',
+      proxyCookies = '',
       port = createRandomNum(10000, 20000), // default random port
       target,
       script,
@@ -122,12 +122,12 @@ program
       sh += ` --proxyHeaders="${proxyHeaders}"`
     }
 
-    if (headers) {
-      sh += ` --headers="${headers}"`
+    if (proxyCookies) {
+      sh += ` --proxyCookies="${proxyCookies}"`
     }
 
-    if (cookies) {
-      sh += ` --cookies="${cookies}"`
+    if (headers) {
+      sh += ` --headers="${headers}"`
     }
 
     if (script) {
@@ -191,7 +191,7 @@ program
         token = '',
         headers = '',
         proxyHeaders = '',
-        cookies = '',
+        proxyCookies = '',
         port,
         target,
         base,
@@ -236,12 +236,12 @@ program
         sh += ` --proxyHeaders=${proxyHeaders}`
       }
 
-      if (headers) {
-        sh += ` --headers="${headers}"`
+      if (proxyCookies) {
+        sh += ` --proxyCookies="${proxyCookies}"`
       }
 
-      if (cookies) {
-        sh += ` --cookies="${cookies}"`
+      if (headers) {
+        sh += ` --headers="${headers}"`
       }
 
       if (script) {
